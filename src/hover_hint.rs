@@ -1,4 +1,4 @@
-use crate::{mesh::create_pos_norm_mesh_entity, VoxelCursorRayImpact};
+use crate::{mesh::create_pos_norm_mesh_pbr_bundle, VoxelCursorRayImpact};
 
 use bevy::{
     app::prelude::*, asset::prelude::*, ecs::prelude::*, pbr::prelude::*, render::prelude::*,
@@ -68,5 +68,9 @@ fn create_hover_hint_entity(
     let mut mesh = PosNormMesh::default();
     face.add_quad_to_pos_norm_mesh(&quad, &mut mesh);
 
-    create_pos_norm_mesh_entity(mesh, material, commands, meshes)
+    commands
+        .spawn(create_pos_norm_mesh_pbr_bundle(mesh, material, meshes))
+        .with(HoverHintTag)
+        .current_entity()
+        .unwrap()
 }

@@ -1,5 +1,6 @@
 use building_blocks_editor::{
-    BVTPlugin, CameraPlugin, SdfVoxelTypeInfo, SmoothMeshPlugin, VoxelPickingPlugin,
+    BVTPlugin, CameraPlugin, HoverHintPlugin, SdfVoxelTypeInfo, SmoothMeshPlugin,
+    VoxelPickingPlugin,
 };
 
 use bevy::{ecs::IntoSystem, prelude::*, window::WindowMode};
@@ -9,12 +10,14 @@ use bevy_building_blocks::{
 
 fn main() {
     let mut window_desc = WindowDescriptor::default();
-    // window_desc.mode = WindowMode::BorderlessFullscreen;
+    window_desc.mode = WindowMode::BorderlessFullscreen;
     window_desc.title = "Building Blocks Editor".to_string();
 
     let mut app_builder = App::build();
     app_builder
         .add_startup_system(initialize_editor.system())
+        .add_startup_stage("init_voxels")
+        .add_startup_system_to_stage("init_voxels", initialize_voxels.system())
         .add_resource(window_desc)
         .add_plugins(DefaultPlugins)
         .add_plugin(MapIoPlugin::<SdfVoxel>::new(
@@ -23,9 +26,9 @@ fn main() {
         ))
         .add_plugin(BVTPlugin::<SdfVoxel>::default())
         .add_plugin(SmoothMeshPlugin::<SdfVoxel>::new())
-        .add_system(example_system.system())
         .add_plugin(VoxelPickingPlugin)
         .add_plugin(CameraPlugin)
+        .add_plugin(HoverHintPlugin)
         .add_resource(ClearColor(Color::rgb(0.3, 0.3, 0.3)));
 
     app_builder.run();
@@ -51,33 +54,12 @@ fn initialize_editor(commands: &mut Commands) {
     });
 }
 
-use bevy::ecs;
 use building_blocks::prelude::*;
-use building_blocks_editor::{SdfVoxel, SdfVoxelType, VoxelDistance, EMPTY_SDF_VOXEL};
+use building_blocks_editor::{SdfVoxel, SdfVoxelType, VoxelDistance};
 
-fn example_system(
-    mut voxel_editor: VoxelEditor<SdfVoxel>,
-    // time: Res<Time>,
-    // mut prev_extent: ecs::Local<PreviousExtent>,
-) {
-    // First clear the previous extent.
-    // if let Some(prev_extent) = prev_extent.0.take() {
-    //     voxel_editor.edit_extent_and_touch_neighbors(prev_extent, |_p, voxel| {
-    //         *voxel = EMPTY_SDF_VOXEL;
-    //     });
-    // }
-
-    // Write some extent that changes with time.
-    // let s = 2.0 * time.seconds_since_startup as f32;
-    let s = 3.14f32 / 4.0;
-    let circle_point = PointN([50.0 * s.cos(), 50.0, 50.0 * s.sin()]).in_voxel();
-    let write_extent = Extent3i::from_two_corners(PointN([0, 0, 0]), circle_point);
+fn initialize_voxels(mut voxel_editor: VoxelEditor<SdfVoxel>) {
+    let write_extent = Extent3i::from_two_corners(PointN([0, 0, 0]), PointN([50, 50, 50]));
     voxel_editor.edit_extent_and_touch_neighbors(write_extent, |_p, voxel| {
         *voxel = SdfVoxel::new(SdfVoxelType(1), VoxelDistance::encode(-10.0));
     });
-
-    // *prev_extent = PreviousExtent(Some(write_extent));
 }
-
-#[derive(Default)]
-struct PreviousExtent(Option<Extent3i>);

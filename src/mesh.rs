@@ -1,6 +1,5 @@
 use bevy::{
     asset::prelude::*,
-    ecs::prelude::*,
     pbr::prelude::*,
     render::{
         mesh::{Indices, VertexAttributeValues},
@@ -10,12 +9,11 @@ use bevy::{
 };
 use building_blocks::mesh::PosNormMesh;
 
-pub fn create_pos_norm_mesh_entity(
+pub fn create_pos_norm_mesh_pbr_bundle(
     mesh: PosNormMesh,
     material: Handle<StandardMaterial>,
-    commands: &mut Commands,
     meshes: &mut Assets<Mesh>,
-) -> Entity {
+) -> PbrBundle {
     assert_eq!(mesh.positions.len(), mesh.normals.len());
     let num_vertices = mesh.positions.len();
 
@@ -32,12 +30,9 @@ pub fn create_pos_norm_mesh_entity(
     );
     render_mesh.set_indices(Some(Indices::U32(mesh.indices)));
 
-    commands
-        .spawn(PbrBundle {
-            mesh: meshes.add(render_mesh),
-            material,
-            ..Default::default()
-        })
-        .current_entity()
-        .unwrap()
+    PbrBundle {
+        mesh: meshes.add(render_mesh),
+        material,
+        ..Default::default()
+    }
 }

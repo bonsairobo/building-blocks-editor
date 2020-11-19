@@ -39,10 +39,8 @@ fn octree_generator_system<V>(
     V: Voxel,
     for<'r> &'r V::TypeInfo: IsEmpty,
 {
-    println!("bvt START");
     let new_chunk_octrees =
         generate_octree_for_each_chunk(&*dirty_chunks, &*voxel_map, &*local_caches, &*pool);
-    println!("bvt MIDDLE");
 
     for (chunk_key, octree) in new_chunk_octrees.into_iter() {
         if octree.is_empty() {
@@ -51,7 +49,6 @@ fn octree_generator_system<V>(
             voxel_bvt.insert(chunk_key, octree);
         }
     }
-    println!("bvt STOP");
 }
 
 fn generate_octree_for_each_chunk<V>(
@@ -64,14 +61,10 @@ where
     V: Voxel,
     for<'r> &'r V::TypeInfo: IsEmpty,
 {
-    println!("bvt SCOPE");
     pool.scope(|s| {
         for chunk_key in dirty_chunks.edited_chunk_keys.clone().into_iter() {
-            println!("bvt SPAWN");
             s.spawn(async move {
-                println!("bvt: Getting cache TLS");
                 let cache_tls = local_caches.get();
-                println!("bvt: Got cache TLS");
                 let reader = map.reader(&cache_tls);
                 let chunk = reader.get_chunk(chunk_key).unwrap();
                 let transform_chunk = TransformMap::new(&chunk.array, map.voxel_info_transform());
