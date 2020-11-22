@@ -1,7 +1,7 @@
 use crate::{geometry::ray_from_window_point, VoxelBVT};
 
 use bevy::{prelude::*, render::camera::Camera};
-use building_blocks::partition::{
+use building_blocks::search::{
     collision::{voxel_ray_cast, VoxelRayImpact},
     ncollide3d::query::Ray as NCRay,
 };

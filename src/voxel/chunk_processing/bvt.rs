@@ -1,9 +1,6 @@
 use bevy_building_blocks::{DirtyChunks, ThreadLocalVoxelCache, Voxel, VoxelMap};
 
-use building_blocks::{
-    partition::{Octree, OctreeDBVT},
-    prelude::*,
-};
+use building_blocks::{prelude::*, search::OctreeDBVT, storage::octree::OctreeSet};
 
 use bevy::{
     prelude::*,
@@ -56,7 +53,7 @@ fn generate_octree_for_each_chunk<V>(
     map: &VoxelMap<V>,
     local_caches: &ThreadLocalVoxelCache<V>,
     pool: &TaskPool,
-) -> Vec<(Point3i, Octree)>
+) -> Vec<(Point3i, OctreeSet)>
 where
     V: Voxel,
     for<'r> &'r V::TypeInfo: IsEmpty,
@@ -71,7 +68,7 @@ where
 
                 (
                     chunk_key,
-                    Octree::from_array3(&transform_chunk, *chunk.array.extent()),
+                    OctreeSet::from_array3(&transform_chunk, *chunk.array.extent()),
                 )
             })
         }

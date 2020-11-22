@@ -1,5 +1,5 @@
 use bevy::math::prelude::*;
-use building_blocks::partition::ncollide3d::query::Ray as NCRay;
+use building_blocks::search::ncollide3d::query::Ray as NCRay;
 
 pub struct Ray3 {
     pub point: Vec3,
