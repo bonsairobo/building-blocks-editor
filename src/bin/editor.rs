@@ -1,16 +1,15 @@
 use building_blocks_editor::{
-    BVTPlugin, CameraPlugin, HoverHintPlugin, SdfVoxelTypeInfo, SmoothMeshPlugin,
+    BVTPlugin, CameraPlugin, SdfVoxelTypeInfo, SelectionToolPlugin, SmoothMeshPlugin,
     VoxelPickingPlugin,
 };
 
-use bevy::{ecs::IntoSystem, prelude::*, window::WindowMode};
+use bevy::{ecs::IntoSystem, prelude::*};
 use bevy_building_blocks::{
     default_chunk_map, ChunkCacheConfig, MapIoPlugin, VoxelEditor, VoxelMap, VoxelPalette,
 };
 
 fn main() {
     let mut window_desc = WindowDescriptor::default();
-    window_desc.mode = WindowMode::BorderlessFullscreen;
     window_desc.title = "Building Blocks Editor".to_string();
 
     let mut app_builder = App::build();
@@ -19,6 +18,7 @@ fn main() {
         .add_startup_stage("init_voxels")
         .add_startup_system_to_stage("init_voxels", initialize_voxels.system())
         .add_resource(window_desc)
+        .add_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
         .add_plugin(MapIoPlugin::<SdfVoxel>::new(
             VOXEL_CHUNK_SHAPE,
@@ -28,7 +28,7 @@ fn main() {
         .add_plugin(SmoothMeshPlugin::<SdfVoxel>::new())
         .add_plugin(VoxelPickingPlugin)
         .add_plugin(CameraPlugin)
-        .add_plugin(HoverHintPlugin)
+        .add_plugin(SelectionToolPlugin)
         .add_resource(ClearColor(Color::rgb(0.3, 0.3, 0.3)));
 
     app_builder.run();
