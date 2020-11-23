@@ -4,12 +4,13 @@ use crate::{
     geometry::{closest_points_on_two_lines, Ray3},
     mesh::create_single_quad_mesh_pbr_bundle,
     voxel::{offset_transform, ClickedVoxel, VoxelFace},
-    CursorRay, ImmediateModeTag, VoxelCursorRayImpact,
+    CursorRay, ImmediateModeTag, SdfVoxel, SdfVoxelType, VoxelCursorRayImpact, VoxelDistance,
 };
 
 use bevy::{
     asset::prelude::*, ecs::prelude::*, input::prelude::*, pbr::prelude::*, render::prelude::*,
 };
+use bevy_building_blocks::VoxelEditor;
 use building_blocks::{
     core::{prelude::*, SignedAxis3},
     mesh::{OrientedCubeFace, UnorientedQuad},
@@ -42,6 +43,7 @@ pub fn drag_face_tool_system(
     commands: &mut Commands,
     mut current_tool: ResMut<CurrentTool>,
     mut meshes: ResMut<Assets<Mesh>>,
+    mut voxel_editor: VoxelEditor<SdfVoxel>,
     material: Res<HoverHintMaterial>,
     voxel_cursor_impact: Res<VoxelCursorRayImpact>,
     clicked_voxel: Res<ClickedVoxel>,
@@ -131,13 +133,26 @@ pub fn drag_face_tool_system(
                     if let Some((p1, _p2)) = closest_points_on_two_lines(&axis_line, ray) {
                         let new_axis_coord =
                             *Point3f::from(p1).in_voxel().axis_component(axis.axis);
+
+                        let old_extent = quad_extent;
                         *quad_extent.minimum.axis_component_mut(axis.axis) = new_axis_coord;
 
-                        *tool = DragFaceTool::DraggingFace {
-                            quad_extent,
-                            axis,
-                            initial_drag_point,
-                        };
+                        let fill_min = quad_extent.minimum.meet(&old_extent.minimum);
+                        let fill_max = quad_extent.max().join(&old_extent.max());
+                        let fill_extent = Extent3i::from_min_and_max(fill_min, fill_max);
+                        voxel_editor.edit_extent(fill_extent, |_p, voxel| {
+                            *voxel = SdfVoxel::new(SdfVoxelType(1), VoxelDistance(-1));
+                        });
+
+                        if clicked_voxel.just_released(MouseButton::Left) {
+                            *tool = DragFaceTool::Start;
+                        } else {
+                            *tool = DragFaceTool::DraggingFace {
+                                quad_extent,
+                                axis,
+                                initial_drag_point,
+                            };
+                        }
                     }
                 }
 
