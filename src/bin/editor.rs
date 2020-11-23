@@ -1,6 +1,6 @@
 use building_blocks_editor::{
-    BVTPlugin, CameraPlugin, SdfVoxelTypeInfo, SelectionToolPlugin, SmoothMeshPlugin,
-    VoxelPickingPlugin,
+    BVTPlugin, CameraPlugin, CursorRayPlugin, EditToolsPlugin, ImmediateModePlugin,
+    SdfVoxelTypeInfo, SmoothMeshPlugin, VoxelPickingPlugin,
 };
 
 use bevy::{ecs::IntoSystem, prelude::*};
@@ -18,18 +18,20 @@ fn main() {
         .add_startup_stage("init_voxels")
         .add_startup_system_to_stage("init_voxels", initialize_voxels.system())
         .add_resource(window_desc)
+        .add_resource(ClearColor(Color::rgb(0.3, 0.3, 0.3)))
         .add_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
+        .add_plugin(ImmediateModePlugin)
         .add_plugin(MapIoPlugin::<SdfVoxel>::new(
             VOXEL_CHUNK_SHAPE,
             ChunkCacheConfig::default(),
         ))
         .add_plugin(BVTPlugin::<SdfVoxel>::default())
         .add_plugin(SmoothMeshPlugin::<SdfVoxel>::new())
-        .add_plugin(VoxelPickingPlugin)
         .add_plugin(CameraPlugin)
-        .add_plugin(SelectionToolPlugin)
-        .add_resource(ClearColor(Color::rgb(0.3, 0.3, 0.3)));
+        .add_plugin(CursorRayPlugin)
+        .add_plugin(VoxelPickingPlugin)
+        .add_plugin(EditToolsPlugin);
 
     app_builder.run();
 }
@@ -58,7 +60,7 @@ use building_blocks::prelude::*;
 use building_blocks_editor::{SdfVoxel, SdfVoxelType, VoxelDistance};
 
 fn initialize_voxels(mut voxel_editor: VoxelEditor<SdfVoxel>) {
-    let write_extent = Extent3i::from_two_corners(PointN([0, 0, 0]), PointN([50, 50, 50]));
+    let write_extent = Extent3i::from_corners(PointN([0, 0, 0]), PointN([50, 50, 50]));
     voxel_editor.edit_extent_and_touch_neighbors(write_extent, |_p, voxel| {
         *voxel = SdfVoxel::new(SdfVoxelType(1), VoxelDistance::encode(-10.0));
     });

@@ -7,7 +7,7 @@ use bevy::{
         prelude::*,
     },
 };
-use building_blocks::mesh::PosNormMesh;
+use building_blocks::mesh::{OrientedCubeFace, PosNormMesh, UnorientedQuad};
 
 pub fn create_pos_norm_mesh_pbr_bundle(
     mesh: PosNormMesh,
@@ -35,4 +35,16 @@ pub fn create_pos_norm_mesh_pbr_bundle(
         material,
         ..Default::default()
     }
+}
+
+pub fn create_single_quad_mesh_pbr_bundle(
+    face: &OrientedCubeFace,
+    quad: &UnorientedQuad,
+    material: Handle<StandardMaterial>,
+    meshes: &mut Assets<Mesh>,
+) -> PbrBundle {
+    let mut mesh = PosNormMesh::default();
+    face.add_quad_to_pos_norm_mesh(quad, &mut mesh);
+
+    create_pos_norm_mesh_pbr_bundle(mesh, material, meshes)
 }

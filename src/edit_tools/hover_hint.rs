@@ -1,11 +1,14 @@
-use crate::{mesh::create_pos_norm_mesh_pbr_bundle, VoxelCursorRayImpact};
+use crate::{
+    mesh::create_single_quad_mesh_pbr_bundle, voxel::offset_transform, ImmediateModeTag,
+    VoxelCursorRayImpact,
+};
 
 use bevy::{
     app::prelude::*, asset::prelude::*, ecs::prelude::*, pbr::prelude::*, render::prelude::*,
 };
 use building_blocks::{
     core::axis::SignedAxis3,
-    mesh::{OrientedCubeFace, PosNormMesh, Quad},
+    mesh::{OrientedCubeFace, UnorientedQuad},
     prelude::*,
 };
 
@@ -30,29 +33,17 @@ fn hover_hint_system(
     material: Res<HoverHintMaterial>,
     commands: &mut Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    hover_hints: Query<(Entity, &HoverHintTag)>,
 ) {
-    if let Some((hint_entity, _)) = hover_hints.iter().next() {
-        // Delete the old hint.
-        commands.despawn(hint_entity);
-    }
-
-    if let Some(impact) = &cursor_voxel.maybe_impact {
-        let normal: mint::Vector3<f32> = impact.impact.normal.normalize().into();
-        let normal = Point3f::from(normal).round().in_voxel();
-        if let Some(normal_axis) = SignedAxis3::from_vector(normal) {
-            create_hover_hint_entity(
-                impact.point,
-                normal_axis,
-                material.0.clone(),
-                commands,
-                &mut *meshes,
-            );
-        }
+    if let Some((impact, normal_axis)) = cursor_voxel.get() {
+        create_hover_hint_entity(
+            impact.point,
+            *normal_axis,
+            material.0.clone(),
+            commands,
+            &mut *meshes,
+        );
     }
 }
-
-pub struct HoverHintTag;
 
 pub struct HoverHintMaterial(pub Handle<StandardMaterial>);
 
@@ -63,14 +54,15 @@ fn create_hover_hint_entity(
     commands: &mut Commands,
     meshes: &mut Assets<Mesh>,
 ) -> Entity {
-    let quad = Quad::for_voxel_face(voxel_point, normal_axis);
+    let quad = UnorientedQuad::from_voxel(voxel_point);
     let face = OrientedCubeFace::canonical(normal_axis);
-    let mut mesh = PosNormMesh::default();
-    face.add_quad_to_pos_norm_mesh(&quad, &mut mesh);
 
     commands
-        .spawn(create_pos_norm_mesh_pbr_bundle(mesh, material, meshes))
-        .with(HoverHintTag)
+        .spawn(create_single_quad_mesh_pbr_bundle(
+            &face, &quad, material, meshes,
+        ))
+        .with(offset_transform(face.mesh_normal() * 0.1))
+        .with(ImmediateModeTag)
         .current_entity()
         .unwrap()
 }
