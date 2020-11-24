@@ -24,12 +24,12 @@ pub enum DragFaceTool {
     },
     SecondCornerSelected {
         quad_extent: Extent3i,
-        axis: SignedAxis3,
+        normal: SignedAxis3,
     },
     DraggingFace {
         quad_extent: Extent3i,
-        axis: SignedAxis3,
-        initial_drag_point: Point3f,
+        normal: SignedAxis3,
+        previous_drag_point: Point3i,
     },
 }
 
@@ -62,19 +62,19 @@ pub fn drag_face_tool_system(
                 face_selection:
                     VoxelFace {
                         point: corner1,
-                        face: face1,
+                        normal: n1,
                     },
             } => {
                 let mut valid_selection = false;
                 if let Some(VoxelFace {
                     point: corner2,
-                    face: face2,
+                    normal: n2,
                 }) = voxel_cursor_impact.get_voxel_face()
                 {
-                    if face1 == face2
-                        && corner1.axis_component(face1.axis) == corner2.axis_component(face2.axis)
+                    if n1 == n2
+                        && corner1.axis_component(n1.axis) == corner2.axis_component(n2.axis)
                     {
-                        let face = OrientedCubeFace::canonical(face1);
+                        let face = OrientedCubeFace::canonical(n1);
                         let quad_extent = Extent3i::from_corners(corner1, corner2);
                         let quad = face.quad_from_extent(&quad_extent);
 
@@ -90,7 +90,7 @@ pub fn drag_face_tool_system(
                             valid_selection = true;
                             *tool = DragFaceTool::SecondCornerSelected {
                                 quad_extent,
-                                axis: face1,
+                                normal: n1,
                             };
                         }
                     }
@@ -99,8 +99,11 @@ pub fn drag_face_tool_system(
                     *tool = DragFaceTool::Start;
                 }
             }
-            DragFaceTool::SecondCornerSelected { quad_extent, axis } => {
-                let face = OrientedCubeFace::canonical(axis);
+            DragFaceTool::SecondCornerSelected {
+                quad_extent,
+                normal,
+            } => {
+                let face = OrientedCubeFace::canonical(normal);
                 let quad = face.quad_from_extent(&quad_extent);
                 create_quad_selection_hint_entity(
                     &quad,
@@ -114,43 +117,65 @@ pub fn drag_face_tool_system(
                     if quad_extent.contains(&voxel_face.point) {
                         *tool = DragFaceTool::DraggingFace {
                             quad_extent,
-                            axis,
-                            initial_drag_point: voxel_face.point.into(),
+                            normal,
+                            previous_drag_point: voxel_face.point,
                         };
                     }
                 }
             }
             DragFaceTool::DraggingFace {
                 mut quad_extent,
-                axis,
-                initial_drag_point,
+                normal,
+                previous_drag_point,
             } => {
-                let face = OrientedCubeFace::canonical(axis);
+                let face = OrientedCubeFace::canonical(normal);
 
                 // Drag the quad using the cursor.
                 if let CursorRay(Some(ray)) = &*cursor_ray {
-                    let axis_line = Ray3::new(initial_drag_point.into(), face.mesh_normal().into());
+                    // To drag the quad along it's normal axis, we need to project the cursor ray
+                    // onto that axis, which is equivalent to finding the two closest points on two
+                    // lines.
+                    let axis_line = Ray3::new(
+                        Point3f::from(previous_drag_point).into(),
+                        face.mesh_normal().into(),
+                    );
                     if let Some((p1, _p2)) = closest_points_on_two_lines(&axis_line, ray) {
-                        let new_axis_coord =
-                            *Point3f::from(p1).in_voxel().axis_component(axis.axis);
+                        let old_quad_extent = quad_extent;
 
-                        let old_extent = quad_extent;
-                        *quad_extent.minimum.axis_component_mut(axis.axis) = new_axis_coord;
+                        // Move the quad to a new position along the axis.
+                        let new_drag_point = Point3f::from(p1).in_voxel();
+                        let new_axis_coord = *new_drag_point.axis_component(normal.axis);
+                        *quad_extent.minimum.axis_component_mut(normal.axis) = new_axis_coord;
 
-                        let fill_min = quad_extent.minimum.meet(&old_extent.minimum);
-                        let fill_max = quad_extent.max().join(&old_extent.max());
+                        let previous_axis_coord = *previous_drag_point.axis_component(normal.axis);
+                        let write_voxel =
+                            if new_axis_coord * normal.sign > previous_axis_coord * normal.sign {
+                                // We're dragging in the direction of the normal, so we should write
+                                // solid voxels.
+                                SdfVoxel::new(SdfVoxelType(1), VoxelDistance(-1))
+                            } else {
+                                // We're dragging in the opposite direction of the normal, so we
+                                // should write empty voxels.
+                                SdfVoxel::new(SdfVoxelType(0), VoxelDistance(1))
+                            };
+
+                        // Write voxels in the extent between the old and new quad.
+                        let fill_min = quad_extent.minimum.meet(&old_quad_extent.minimum);
+                        let fill_max = quad_extent.max().join(&old_quad_extent.max());
                         let fill_extent = Extent3i::from_min_and_max(fill_min, fill_max);
                         voxel_editor.edit_extent(fill_extent, |_p, voxel| {
-                            *voxel = SdfVoxel::new(SdfVoxelType(1), VoxelDistance(-1));
+                            *voxel = write_voxel;
                         });
 
                         if clicked_voxel.just_released(MouseButton::Left) {
+                            // Done dragging.
                             *tool = DragFaceTool::Start;
                         } else {
+                            // Still dragging.
                             *tool = DragFaceTool::DraggingFace {
                                 quad_extent,
-                                axis,
-                                initial_drag_point,
+                                normal,
+                                previous_drag_point: new_drag_point,
                             };
                         }
                     }

@@ -61,10 +61,10 @@ impl ClickedVoxel {
         states.just_released = None;
         states.just_clicked = None;
 
-        if let Some((impact, face)) = voxel_cursor_impact.get() {
+        if let Some((impact, normal)) = voxel_cursor_impact.get() {
             let voxel_face = VoxelFace {
                 point: impact.point,
-                face: *face,
+                normal: *normal,
             };
 
             if mouse_input.just_pressed(MouseButton::Left) {

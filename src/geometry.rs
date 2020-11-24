@@ -54,6 +54,7 @@ pub fn ray_from_window_point(
     Ray3::new(camera_position, ray_direction)
 }
 
+/// Find the closest pair of points `(p1, p2)` where `p1` is on line `l1` and `p2` is on line `l2`.
 pub fn closest_points_on_two_lines(l1: &Ray3, l2: &Ray3) -> Option<(Vec3, Vec3)> {
     // The key insight is that the vector between the two points must be perpendicular to both
     // lines. So we end up with this linear system:
