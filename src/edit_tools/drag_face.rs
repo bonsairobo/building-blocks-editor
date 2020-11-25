@@ -176,7 +176,7 @@ pub fn drag_face_tool_system(
                         let fill_min = quad_extent.minimum.meet(&old_quad_extent.minimum);
                         let fill_max = quad_extent.max().join(&old_quad_extent.max());
                         let fill_extent = Extent3i::from_min_and_max(fill_min, fill_max);
-                        voxel_editor.edit_extent(fill_extent, |_p, voxel| {
+                        voxel_editor.edit_extent_and_touch_neighbors(fill_extent, |_p, voxel| {
                             *voxel = write_voxel;
                         });
 
