@@ -7,8 +7,11 @@ pub use plugin::EditToolsPlugin;
 use drag_face::DragFaceTool;
 
 pub enum CurrentTool {
+    MakeSelection, // TODO: extract from DragFaceTool
+    MoveSelection, // TODO
+    Copy,          // TODO
+    Cut,           // TODO
+    Paste,         // TODO
     DragFace(DragFaceTool),
-    Copy,  // TODO
-    Cut,   // TODO
-    Paste, // TODO
+    PaintMaterial, // TODO
 }

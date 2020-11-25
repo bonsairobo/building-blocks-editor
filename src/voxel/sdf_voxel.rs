@@ -45,12 +45,14 @@ pub struct SdfVoxelType(pub u8);
 pub struct VoxelDistance(pub i8);
 
 impl VoxelDistance {
-    // This is mostly just experimental. I don't have a good rationale for this value.
-    const SDF_QUANTIZE_FACTOR: f32 = 50.0;
+    const MAX_DISTANCE: f32 = 4.0;
+    const MIN_DISTANCE: f32 = -4.0;
+    // Should be 1/32 sub-voxel precision.
+    const SDF_PRECISION: f32 = (Self::MAX_DISTANCE - Self::MIN_DISTANCE) / 256.0;
 
     pub fn encode(distance: f32) -> Self {
         Self(
-            (distance * Self::SDF_QUANTIZE_FACTOR)
+            (distance / Self::SDF_PRECISION)
                 .min(std::i8::MAX as f32)
                 .max(std::i8::MIN as f32) as i8,
         )
@@ -58,7 +60,7 @@ impl VoxelDistance {
 
     /// The inverse of `encode`.
     pub fn decode(self: Self) -> f32 {
-        self.0 as f32 / Self::SDF_QUANTIZE_FACTOR
+        self.0 as f32 * Self::SDF_PRECISION
     }
 
     pub fn min() -> Self {
