@@ -52,8 +52,9 @@ pub fn drag_face_tool_system(
     if let CurrentTool::DragFace(tool) = &mut *current_tool {
         match *tool {
             DragFaceTool::Start => {
-                if let Some(face_selection) =
-                    clicked_voxel.for_button(MouseButton::Left).just_clicked
+                if let Some(face_selection) = clicked_voxel
+                    .for_button(MouseButton::Left)
+                    .just_clicked_face
                 {
                     *tool = DragFaceTool::FirstCornerSelected { face_selection };
                 }
@@ -86,7 +87,11 @@ pub fn drag_face_tool_system(
                             &mut *meshes,
                         );
 
-                        if clicked_voxel.just_clicked(MouseButton::Left) {
+                        if clicked_voxel
+                            .for_button(MouseButton::Left)
+                            .just_clicked_face
+                            .is_some()
+                        {
                             valid_selection = true;
                             *tool = DragFaceTool::SecondCornerSelected {
                                 quad_extent,
@@ -95,7 +100,12 @@ pub fn drag_face_tool_system(
                         }
                     }
                 }
-                if !valid_selection && clicked_voxel.just_clicked(MouseButton::Left) {
+                if !valid_selection
+                    && clicked_voxel
+                        .for_button(MouseButton::Left)
+                        .just_clicked_face
+                        .is_some()
+                {
                     *tool = DragFaceTool::Start;
                 }
             }
@@ -113,7 +123,10 @@ pub fn drag_face_tool_system(
                     &mut *meshes,
                 );
 
-                if let Some(voxel_face) = clicked_voxel.for_button(MouseButton::Left).just_pressed {
+                if let Some(voxel_face) = clicked_voxel
+                    .for_button(MouseButton::Left)
+                    .just_pressed_face
+                {
                     if quad_extent.contains(&voxel_face.point) {
                         *tool = DragFaceTool::DraggingFace {
                             quad_extent,
@@ -167,7 +180,7 @@ pub fn drag_face_tool_system(
                             *voxel = write_voxel;
                         });
 
-                        if clicked_voxel.just_released(MouseButton::Left) {
+                        if clicked_voxel.for_button(MouseButton::Left).just_released {
                             // Done dragging.
                             *tool = DragFaceTool::Start;
                         } else {

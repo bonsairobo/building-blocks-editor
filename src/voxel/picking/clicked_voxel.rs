@@ -15,17 +15,23 @@ pub struct ClickedVoxel {
 #[derive(Default)]
 pub struct MouseButtonClickedVoxel {
     /// The voxel face currently pressed by the mouse.
-    pub pressed: Option<VoxelFace>,
+    pub pressed_face: Option<VoxelFace>,
     /// If the mouse is pressed, this is the first voxel face that was pressed since the last
     /// release.
-    pub press_start: Option<VoxelFace>,
+    pub press_start_face: Option<VoxelFace>,
     /// If the mouse was just pressed, this is the voxel where it was pressed.
-    pub just_pressed: Option<VoxelFace>,
+    pub just_pressed_face: Option<VoxelFace>,
     /// If the mouse was just released, this is the voxel where it was released.
-    pub just_released: Option<VoxelFace>,
+    pub just_released_face: Option<VoxelFace>,
     /// If the mouse was just released on the same voxel as `press_start`, then this is that voxel
     /// face.
-    pub just_clicked: Option<VoxelFace>,
+    pub just_clicked_face: Option<VoxelFace>,
+
+    // These are the same as the fields on `Input<MouseButton>`, but they're time-consistent with
+    // the rest of the states on this struct.
+    pub pressed: bool,
+    pub just_pressed: bool,
+    pub just_released: bool,
 }
 
 impl ClickedVoxel {
@@ -56,10 +62,14 @@ impl ClickedVoxel {
     ) {
         let states = self.for_button_mut(button);
 
-        states.pressed = None;
-        states.just_pressed = None;
-        states.just_released = None;
-        states.just_clicked = None;
+        states.pressed = mouse_input.pressed(button);
+        states.just_pressed = mouse_input.just_pressed(button);
+        states.just_released = mouse_input.just_released(button);
+
+        states.pressed_face = None;
+        states.just_pressed_face = None;
+        states.just_released_face = None;
+        states.just_clicked_face = None;
 
         if let Some((impact, normal)) = voxel_cursor_impact.get() {
             let voxel_face = VoxelFace {
@@ -68,42 +78,23 @@ impl ClickedVoxel {
             };
 
             if mouse_input.just_pressed(MouseButton::Left) {
-                states.just_pressed = Some(voxel_face);
-                states.press_start = Some(voxel_face);
+                states.just_pressed_face = Some(voxel_face);
+                states.press_start_face = Some(voxel_face);
             }
             if mouse_input.just_released(MouseButton::Left) {
-                states.just_released = Some(voxel_face);
+                states.just_released_face = Some(voxel_face);
 
-                if states.press_start == Some(voxel_face) {
-                    states.just_clicked = Some(voxel_face);
+                if states.press_start_face == Some(voxel_face) {
+                    states.just_clicked_face = Some(voxel_face);
                 }
             }
 
             if mouse_input.pressed(MouseButton::Left) {
-                states.pressed = Some(voxel_face);
+                states.pressed_face = Some(voxel_face);
             } else {
-                states.press_start = None;
+                states.press_start_face = None;
             }
         }
-    }
-
-    // Following methods are for convenience, since systems shouldn't use both `Input<MouseButton>`
-    // and `ClickedVoxel`, otherwise they risk inconsistent event ordering.
-
-    pub fn just_clicked(&self, button: MouseButton) -> bool {
-        self.for_button(button).just_clicked.is_some()
-    }
-
-    pub fn just_released(&self, button: MouseButton) -> bool {
-        self.for_button(button).just_released.is_some()
-    }
-
-    pub fn just_pressed(&self, button: MouseButton) -> bool {
-        self.for_button(button).just_pressed.is_some()
-    }
-
-    pub fn pressed(&self, button: MouseButton) -> bool {
-        self.for_button(button).pressed.is_some()
     }
 }
 
