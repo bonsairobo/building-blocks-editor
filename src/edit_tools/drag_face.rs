@@ -152,11 +152,11 @@ pub fn drag_face_tool_system(
                             if new_axis_coord * normal.sign > previous_axis_coord * normal.sign {
                                 // We're dragging in the direction of the normal, so we should write
                                 // solid voxels.
-                                SdfVoxel::new(SdfVoxelType(1), VoxelDistance(-1))
+                                SdfVoxel::new(SdfVoxelType(1), VoxelDistance::min())
                             } else {
                                 // We're dragging in the opposite direction of the normal, so we
                                 // should write empty voxels.
-                                SdfVoxel::new(SdfVoxelType(0), VoxelDistance(1))
+                                SdfVoxel::new(SdfVoxelType(0), VoxelDistance::max())
                             };
 
                         // Write voxels in the extent between the old and new quad.

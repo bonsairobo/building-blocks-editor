@@ -60,6 +60,14 @@ impl VoxelDistance {
     pub fn decode(self: Self) -> f32 {
         self.0 as f32 / Self::SDF_QUANTIZE_FACTOR
     }
+
+    pub fn min() -> Self {
+        Self(std::i8::MIN)
+    }
+
+    pub fn max() -> Self {
+        Self(std::i8::MAX)
+    }
 }
 
 impl SignedDistance for SdfVoxel {
