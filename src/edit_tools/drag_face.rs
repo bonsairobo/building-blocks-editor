@@ -1,4 +1,4 @@
-use super::{hover_hint::HoverHintMaterial, CurrentTool};
+use super::{hover_hint::HoverHintMaterial, CurrentTool, HOVER_DISTANCE};
 
 use crate::{
     geometry::{closest_points_on_two_lines, Ray3},
@@ -214,7 +214,7 @@ fn create_quad_selection_hint_entity(
         .spawn(create_single_quad_mesh_pbr_bundle(
             &face, &quad, material, meshes,
         ))
-        .with(offset_transform(face.mesh_normal() * 0.1))
+        .with(offset_transform(face.mesh_normal() * HOVER_DISTANCE))
         .with(ImmediateModeTag)
         .current_entity()
         .unwrap()

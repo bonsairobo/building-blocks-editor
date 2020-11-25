@@ -1,3 +1,5 @@
+use super::HOVER_DISTANCE;
+
 use crate::{
     mesh::create_single_quad_mesh_pbr_bundle, voxel::offset_transform, ImmediateModeTag,
     VoxelCursorRayImpact,
@@ -61,7 +63,7 @@ fn create_hover_hint_entity(
         .spawn(create_single_quad_mesh_pbr_bundle(
             &face, &quad, material, meshes,
         ))
-        .with(offset_transform(face.mesh_normal() * 0.1))
+        .with(offset_transform(face.mesh_normal() * HOVER_DISTANCE))
         .with(ImmediateModeTag)
         .current_entity()
         .unwrap()

@@ -15,3 +15,5 @@ pub enum CurrentTool {
     DragFace(DragFaceTool),
     PaintMaterial, // TODO
 }
+
+const HOVER_DISTANCE: f32 = 0.5;
