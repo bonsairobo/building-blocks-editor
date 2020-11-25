@@ -33,12 +33,6 @@ pub enum DragFaceTool {
     },
 }
 
-impl Default for DragFaceTool {
-    fn default() -> Self {
-        DragFaceTool::Start
-    }
-}
-
 pub fn drag_face_tool_system(
     commands: &mut Commands,
     mut current_tool: ResMut<CurrentTool>,
