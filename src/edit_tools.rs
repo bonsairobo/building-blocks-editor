@@ -1,19 +1,22 @@
 mod drag_face;
-mod hover_hint;
 mod plugin;
+mod selection;
 
 pub use plugin::EditToolsPlugin;
 
-use drag_face::DragFaceTool;
+use drag_face::DragFaceState;
 
 pub enum CurrentTool {
-    MakeSelection, // TODO: extract from DragFaceTool
+    Copy, // TODO
+    Cut,  // TODO
+    DragFace(DragFaceState),
     MoveSelection, // TODO
-    Copy,          // TODO
-    Cut,           // TODO
-    Paste,         // TODO
-    DragFace(DragFaceTool),
     PaintMaterial, // TODO
+    Paste,         // TODO
+    Tiler,         // TODO: tile the current selection by dragging; replaces DragFace
 }
 
-const HOVER_DISTANCE: f32 = 0.5;
+// TODO: resize selection cursor
+
+// TODO: smart tools; given some map palette and constraints, you can carve out section of map, and
+// tiles get placed automatically, e.g. walls, floors, doors, and stairs are detected

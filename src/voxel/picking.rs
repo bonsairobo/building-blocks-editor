@@ -1,7 +1,7 @@
-mod clicked_voxel;
-mod cursor_impact;
 mod plugin;
+mod ray_impact;
+mod voxel_cursor;
 
-pub use clicked_voxel::ClickedVoxel;
-pub use cursor_impact::VoxelCursorRayImpact;
 pub use plugin::VoxelPickingPlugin;
+pub use ray_impact::VoxelCursorRayImpact;
+pub use voxel_cursor::VoxelCursor;

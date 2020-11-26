@@ -1,6 +1,6 @@
 use super::{
-    drag_face::{drag_face_tool_system, DragFaceTool},
-    hover_hint::HoverHintPlugin,
+    drag_face::{drag_face_tool_system, DragFaceState},
+    selection::SelectionPlugin,
     CurrentTool,
 };
 
@@ -11,8 +11,8 @@ pub struct EditToolsPlugin;
 
 impl Plugin for EditToolsPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_resource(CurrentTool::DragFace(DragFaceTool::Start))
-            .add_system(drag_face_tool_system.system())
-            .add_plugin(HoverHintPlugin);
+        app.add_plugin(SelectionPlugin)
+            .add_resource(CurrentTool::DragFace(DragFaceState::SelectionReady))
+            .add_system(drag_face_tool_system.system());
     }
 }
