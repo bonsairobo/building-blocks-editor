@@ -1,9 +1,10 @@
 use super::{selection::SelectionState, CurrentTool};
 
 use crate::{
+    camera::CursorRay,
     geometry::{closest_points_on_two_lines, Ray3},
     voxel::VoxelCursor,
-    CursorRay, SdfVoxel, SdfVoxelType, VoxelDistance,
+    SdfVoxel, SdfVoxelType, VoxelDistance,
 };
 
 use bevy::{ecs::prelude::*, input::prelude::*};

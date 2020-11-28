@@ -1,5 +1,5 @@
 use building_blocks_editor::{
-    BVTPlugin, CameraPlugin, CursorRayPlugin, EditToolsPlugin, ImmediateModePlugin,
+    BVTPlugin, CameraPlugin, CursorPositionPlugin, EditToolsPlugin, ImmediateModePlugin,
     SdfVoxelTypeInfo, SmoothMeshPlugin, VoxelPickingPlugin,
 };
 
@@ -22,6 +22,7 @@ fn main() {
         .add_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
         .add_plugin(ImmediateModePlugin)
+        .add_plugin(CursorPositionPlugin)
         .add_plugin(MapIoPlugin::<SdfVoxel>::new(
             VOXEL_CHUNK_SHAPE,
             ChunkCacheConfig::default(),
@@ -29,7 +30,6 @@ fn main() {
         .add_plugin(BVTPlugin::<SdfVoxel>::default())
         .add_plugin(SmoothMeshPlugin::<SdfVoxel>::new())
         .add_plugin(CameraPlugin)
-        .add_plugin(CursorRayPlugin)
         .add_plugin(VoxelPickingPlugin)
         .add_plugin(EditToolsPlugin);
 
