@@ -8,7 +8,7 @@ use super::{
 use bevy::{
     app::prelude::*,
     ecs::prelude::*,
-    input::{mouse::MouseWheel, prelude::*},
+    input::{keyboard::KeyboardInput, mouse::MouseWheel, prelude::*},
     transform::components::Transform,
 };
 use serde::{Deserialize, Serialize};
@@ -25,6 +25,7 @@ pub fn third_person_camera_control_system(
     mut mouse_wheel_reader: Local<MouseWheelReader>,
     mouse_wheel: Res<Events<MouseWheel>>,
     mouse_buttons: Res<Input<MouseButton>>,
+    keys: Res<Input<KeyCode>>,
     cursor_position: Res<CursorPosition>,
     cursor_ray_calc: Res<CursorRayCalculator>,
     mut cameras: Query<(&mut ThirdPersonCamera, &mut Transform)>,
@@ -42,26 +43,34 @@ pub fn third_person_camera_control_system(
         smoother,
     } = &mut *camera;
 
-    // We cast cursor rays against this plane so the user can drag along it in order to translate
-    // the camera.
-    let drag_plane = Plane {
-        origin: transform.target,
-        // Avoid having the eye vector be coplanar, which causes headaches for the floor
-        // dragging controls.
-        normal: transform.eye_vec.unit_vector(),
-    };
-    // Interpret device input into control data.
-    let mouse_wheel_events = mouse_wheel_reader.reader.iter(&mouse_wheel);
-    let input = input_processor.process_input(
-        &control_config.input_config,
-        cursor_position.0,
-        &*mouse_buttons,
-        mouse_wheel_events,
-        &drag_plane,
-        &*cursor_ray_calc,
-    );
+    // We must be pressing the camera button for anything to take effect.
+    if keys.pressed(KeyCode::C) {
+        // We cast cursor rays against this plane so the user can drag along it in order to translate
+        // the camera.
+        let drag_plane = Plane {
+            origin: transform.target,
+            // Avoid having the eye vector be coplanar, which causes headaches for the floor
+            // dragging controls.
+            normal: transform.eye_vec.unit_vector(),
+        };
+        // Interpret device input into control data.
+        let mouse_wheel_events = mouse_wheel_reader.reader.iter(&mouse_wheel);
+        let input = input_processor.process_input(
+            &control_config.input_config,
+            cursor_position.0,
+            &*mouse_buttons,
+            mouse_wheel_events,
+            &drag_plane,
+            &*cursor_ray_calc,
+        );
 
-    *camera_transform = update_transform(control_config, &input, smoother, transform);
+        update_transform(control_config, &input, smoother, transform);
+    }
+
+    // Apply a smoothing filter to the transform.
+    *camera_transform = smoother
+        .smooth_transform(control_config.smoothing_weight, &transform)
+        .transform()
 }
 
 fn update_transform(
@@ -69,7 +78,7 @@ fn update_transform(
     input: &ProcessedInput,
     smoother: &mut TransformSmoother,
     transform: &mut ThirdPersonTransform,
-) -> Transform {
+) {
     // Translate the target.
     transform.target += input.target_translation;
     // Rotate around the target.
@@ -80,10 +89,6 @@ fn update_transform(
     transform.radius = (transform.radius * input.radius_scalar)
         .min(control_config.max_radius)
         .max(control_config.min_radius);
-    // Apply a smoothing filter to the transform.
-    smoother
-        .smooth_transform(control_config.smoothing_weight, &transform)
-        .transform()
 }
 
 #[derive(Default)]
