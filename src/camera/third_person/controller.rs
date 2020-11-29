@@ -1,8 +1,6 @@
 use crate::{camera::cursor_ray::CursorRayCalculator, geometry::Plane, CursorPosition};
 
-use super::{
-    input::ProcessedInput, transform::ThirdPersonTransform, InputConfig, ThirdPersonCamera,
-};
+use super::{input::ProcessedInput, InputConfig, OrbitTransform, ThirdPersonCamera};
 
 use bevy::{
     app::prelude::*,
@@ -47,10 +45,10 @@ pub fn third_person_camera_control_system(
         // We cast cursor rays against this plane so the user can drag along it in order to translate
         // the camera.
         let drag_plane = Plane {
-            origin: transform.target,
+            origin: transform.pivot,
             // Avoid having the eye vector be coplanar, which causes headaches for the floor
             // dragging controls.
-            normal: transform.eye_vec.unit_vector(),
+            normal: transform.unit_vector(),
         };
         // Interpret device input into control data.
         let mouse_wheel_events = mouse_wheel_reader.reader.iter(&mouse_wheel);
@@ -69,20 +67,20 @@ pub fn third_person_camera_control_system(
     // Apply a smoothing filter to the transform.
     *camera_transform = smoother
         .smooth_transform(control_config.smoothing_weight, &transform)
-        .transform()
+        .orbit_look_at_pivot_transform();
 }
 
 fn update_transform(
     control_config: &ControlConfig,
     input: &ProcessedInput,
-    transform: &mut ThirdPersonTransform,
+    transform: &mut OrbitTransform,
 ) {
     // Translate the target.
-    transform.target += input.target_translation;
+    transform.pivot += input.target_translation;
     // Rotate around the target.
     transform.add_yaw(input.delta_yaw);
     transform.add_pitch(input.delta_pitch);
-    transform.eye_vec.assert_not_looking_up();
+    transform.vector.assert_not_looking_up();
     // Scale the camera's distance from the target.
     transform.radius = (transform.radius * input.radius_scalar)
         .min(control_config.max_radius)

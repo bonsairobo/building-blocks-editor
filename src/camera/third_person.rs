@@ -1,17 +1,14 @@
+use super::orbit_transform::{OrbitTransform, Smoother};
+
 mod controller;
 mod input;
 mod plugin;
-mod smoother;
-mod transform;
-mod vector;
 
 pub use controller::ControlConfig;
 pub use input::InputConfig;
 pub use plugin::ThirdPersonCameraPlugin;
 
 use input::InputProcessor;
-use smoother::TransformSmoother;
-use transform::ThirdPersonTransform;
 
 use bevy::math::prelude::*;
 
@@ -21,8 +18,8 @@ use bevy::math::prelude::*;
 pub struct ThirdPersonCamera {
     control_config: ControlConfig,
     input_processor: InputProcessor,
-    transform: ThirdPersonTransform,
-    smoother: TransformSmoother,
+    transform: OrbitTransform,
+    smoother: Smoother,
 }
 
 impl ThirdPersonCamera {
@@ -30,8 +27,8 @@ impl ThirdPersonCamera {
         Self {
             control_config,
             input_processor: InputProcessor::default(),
-            transform: ThirdPersonTransform::from_position_and_target(position, target),
-            smoother: TransformSmoother::default(),
+            transform: OrbitTransform::from_pivot_and_orbit(target, position),
+            smoother: Smoother::default(),
         }
     }
 }
