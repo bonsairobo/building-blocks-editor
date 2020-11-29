@@ -1,14 +1,13 @@
 use crate::{camera::cursor_ray::CursorRayCalculator, geometry::Plane, CursorPosition};
 
 use super::{
-    input::ProcessedInput, smoother::TransformSmoother, transform::ThirdPersonTransform,
-    InputConfig, ThirdPersonCamera,
+    input::ProcessedInput, transform::ThirdPersonTransform, InputConfig, ThirdPersonCamera,
 };
 
 use bevy::{
     app::prelude::*,
     ecs::prelude::*,
-    input::{keyboard::KeyboardInput, mouse::MouseWheel, prelude::*},
+    input::{mouse::MouseWheel, prelude::*},
     transform::components::Transform,
 };
 use serde::{Deserialize, Serialize};
@@ -64,7 +63,7 @@ pub fn third_person_camera_control_system(
             &*cursor_ray_calc,
         );
 
-        update_transform(control_config, &input, smoother, transform);
+        update_transform(control_config, &input, transform);
     }
 
     // Apply a smoothing filter to the transform.
@@ -76,7 +75,6 @@ pub fn third_person_camera_control_system(
 fn update_transform(
     control_config: &ControlConfig,
     input: &ProcessedInput,
-    smoother: &mut TransformSmoother,
     transform: &mut ThirdPersonTransform,
 ) {
     // Translate the target.

@@ -59,7 +59,7 @@ impl VoxelDistance {
     }
 
     /// The inverse of `encode`.
-    pub fn decode(self: Self) -> f32 {
+    pub fn decode(self) -> f32 {
         self.0 as f32 * Self::SDF_PRECISION
     }
 
