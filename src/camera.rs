@@ -1,14 +1,11 @@
+mod controller;
 mod cursor_ray;
-mod first_person;
 mod orbit_transform;
-mod third_person;
 
+pub use controller::{mouse_camera_control_system, ControlConfig, MouseCameraController};
 pub use cursor_ray::{CursorRay, CursorRayCalculator};
-pub use first_person::{ControlConfig, FirstPersonCamera, FirstPersonCameraPlugin};
-// pub use third_person::{ControlConfig, InputConfig};
 
 use cursor_ray::{CursorRayCameraTag, CursorRayPlugin};
-// use third_person::{ThirdPersonCamera, ThirdPersonCameraPlugin};
 
 use bevy::{
     app::prelude::*, ecs::prelude::*, math::prelude::*, render::entity::Camera3dBundle,
@@ -19,10 +16,9 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_plugin(FirstPersonCameraPlugin)
-            // .add_plugin(ThirdPersonCameraPlugin)
-            .add_plugin(CursorRayPlugin)
-            .add_startup_system(initialize_camera.system());
+        app.add_startup_system(initialize_camera.system())
+            .add_system(mouse_camera_control_system.system())
+            .add_plugin(CursorRayPlugin);
     }
 }
 
@@ -51,8 +47,7 @@ fn create_camera_entity(
     commands
         .spawn(camera_components)
         .with(CursorRayCameraTag)
-        .with(FirstPersonCamera::new(control_config, eye, target))
-        // .with(ThirdPersonCamera::new(control_config, eye, target))
+        .with(MouseCameraController::new(control_config, eye, target))
         .current_entity()
         .unwrap()
 }

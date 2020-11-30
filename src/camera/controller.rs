@@ -1,4 +1,4 @@
-use super::FirstPersonCamera;
+use crate::camera::orbit_transform::{OrbitTransform, PolarVector, Smoother};
 
 use crate::CursorPosition;
 
@@ -11,6 +11,25 @@ use bevy::{
 };
 use serde::{Deserialize, Serialize};
 
+/// A camera controlled with the mouse in the same way as Unreal Engine's viewport controller.
+pub struct MouseCameraController {
+    control_config: ControlConfig,
+    transform: OrbitTransform,
+    smoother: Smoother,
+    prev_cursor_position: Vec2,
+}
+
+impl MouseCameraController {
+    pub fn new(control_config: ControlConfig, pivot: Vec3, orbit: Vec3) -> Self {
+        Self {
+            control_config,
+            transform: OrbitTransform { pivot, orbit },
+            prev_cursor_position: Default::default(),
+            smoother: Default::default(),
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize)]
 pub struct ControlConfig {
     pub mouse_rotate_sensitivity: f32,
@@ -19,13 +38,13 @@ pub struct ControlConfig {
     pub smoothing_weight: f32,
 }
 
-pub fn first_person_camera_control_system(
+pub fn mouse_camera_control_system(
     mut mouse_wheel_reader: Local<MouseWheelReader>,
     mouse_wheel: Res<Events<MouseWheel>>,
     mouse_buttons: Res<Input<MouseButton>>,
     keys: Res<Input<KeyCode>>,
     cursor_position: Res<CursorPosition>,
-    mut cameras: Query<(&mut FirstPersonCamera, &mut Transform)>,
+    mut cameras: Query<(&mut MouseCameraController, &mut Transform)>,
 ) {
     let (mut camera, mut camera_transform) = if let Some((camera, tfm)) = cameras.iter_mut().next()
     {
@@ -33,12 +52,16 @@ pub fn first_person_camera_control_system(
     } else {
         return;
     };
-    let FirstPersonCamera {
+    let MouseCameraController {
         control_config,
         transform,
         smoother,
         prev_cursor_position,
     } = &mut *camera;
+
+    let look_vector = (transform.orbit - transform.pivot).normalize();
+    let mut polar_vector = PolarVector::from_vector(look_vector);
+    let forward_vector = Vec3::new(look_vector.x, 0.0, look_vector.z).normalize();
 
     // We must be pressing the camera button for anything to take effect.
     if keys.pressed(KeyCode::C) {
@@ -46,19 +69,19 @@ pub fn first_person_camera_control_system(
 
         if mouse_buttons.pressed(MouseButton::Left) && !mouse_buttons.pressed(MouseButton::Right) {
             // Drag translates forward/backward and rotates about the Y axis.
-            transform.add_yaw(-control_config.mouse_rotate_sensitivity * cursor_delta.x);
-            let forward_vec = transform.unit_vector();
-            let forward_vec = Vec3::new(forward_vec.x, 0.0, forward_vec.z).normalize();
+            polar_vector.add_yaw(-control_config.mouse_rotate_sensitivity * cursor_delta.x);
             transform.pivot +=
-                control_config.mouse_translate_sensitivity * cursor_delta.y * forward_vec;
+                control_config.mouse_translate_sensitivity * cursor_delta.y * forward_vector;
         }
         if !mouse_buttons.pressed(MouseButton::Left) && mouse_buttons.pressed(MouseButton::Right) {
             // Drag rotates with pitch and yaw.
-            transform.add_yaw(-control_config.mouse_rotate_sensitivity * cursor_delta.x);
-            transform.add_pitch(control_config.mouse_rotate_sensitivity * cursor_delta.y);
+            polar_vector.add_yaw(-control_config.mouse_rotate_sensitivity * cursor_delta.x);
+            polar_vector.add_pitch(control_config.mouse_rotate_sensitivity * cursor_delta.y);
         }
 
-        let yaw_rot = Quat::from_axis_angle(Vec3::unit_y(), transform.get_yaw());
+        polar_vector.assert_not_looking_up();
+
+        let yaw_rot = Quat::from_axis_angle(Vec3::unit_y(), polar_vector.get_yaw());
         let rot_x = yaw_rot * Vec3::unit_x();
         let rot_y = yaw_rot * Vec3::unit_y();
         if mouse_buttons.pressed(MouseButton::Left) && mouse_buttons.pressed(MouseButton::Right) {
@@ -74,6 +97,8 @@ pub fn first_person_camera_control_system(
         }
         transform.pivot += control_config.trackpad_translate_sensitivity
             * (-trackpad_delta.x * rot_x + trackpad_delta.y * rot_y);
+
+        transform.orbit = transform.pivot + transform.radius() * polar_vector.unit_vector();
     }
 
     *camera_transform = smoother

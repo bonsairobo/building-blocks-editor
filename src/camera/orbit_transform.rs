@@ -5,55 +5,34 @@ use bevy::{math::prelude::*, transform::components::Transform};
 
 const PI: f32 = std::f32::consts::PI;
 
-/// Two points, with one orbiting the other. The oribiting point is parametrized in polar
-/// coordinates.
+/// Two points, with one orbiting the other.
 #[derive(Clone, Copy, Debug)]
 pub struct OrbitTransform {
     pub pivot: Vec3,
-    pub vector: PolarVector,
-    pub radius: f32,
+    pub orbit: Vec3,
 }
 
 impl OrbitTransform {
-    pub fn from_pivot_and_orbit(pivot: Vec3, orbit: Vec3) -> Self {
-        let v = orbit - pivot;
-        let vector = PolarVector::from_vector(v);
-        let radius = v.length();
-
-        Self {
-            pivot,
-            vector,
-            radius,
-        }
+    pub fn radius(&self) -> f32 {
+        (self.pivot - self.orbit).length()
     }
 
-    pub fn get_orbit_position(&self) -> Vec3 {
-        self.get_orbit_position_at_radius(self.radius)
+    pub fn pivot_look_at_orbit_transform(&self) -> Transform {
+        p1_look_at_p2_transform(self.pivot, self.orbit)
     }
 
-    pub fn get_orbit_position_at_radius(&self, radius: f32) -> Vec3 {
-        self.pivot + radius * self.vector.unit_vector()
+    pub fn orbit_look_at_pivot_transform(&self) -> Transform {
+        p1_look_at_p2_transform(self.orbit, self.pivot)
     }
+}
 
-    pub fn add_pitch(&mut self, dpitch: f32) {
-        self.vector.add_pitch(dpitch)
-    }
+pub fn p1_look_at_p2_transform(p1: Vec3, p2: Vec3) -> Transform {
+    // If p1 and p2 are very close, we avoid imprecision issues by keeping the look vector a unit
+    // vector.
+    let look_vector = (p2 - p1).normalize();
+    let look_at = p1 + look_vector;
 
-    pub fn add_yaw(&mut self, dyaw: f32) {
-        self.vector.add_yaw(dyaw)
-    }
-
-    pub fn get_pitch(&self) -> f32 {
-        self.vector.get_pitch()
-    }
-
-    pub fn get_yaw(&self) -> f32 {
-        self.vector.get_yaw()
-    }
-
-    pub fn unit_vector(&self) -> Vec3 {
-        self.vector.unit_vector()
-    }
+    Transform::from_translation(p1).looking_at(look_at, Vec3::unit_y())
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -120,7 +99,7 @@ impl PolarVector {
 
 #[derive(Default)]
 pub struct Smoother {
-    lerp_tfm: Option<LerpOrbitTransform>,
+    lerp_tfm: Option<OrbitTransform>,
 }
 
 impl Smoother {
@@ -130,51 +109,20 @@ impl Smoother {
         &mut self,
         lag_weight: f32,
         new_tfm: &OrbitTransform,
-    ) -> LerpOrbitTransform {
+    ) -> OrbitTransform {
         debug_assert!(0.0 <= lag_weight);
         debug_assert!(lag_weight < 1.0);
 
-        let old_lerp_tfm = self.lerp_tfm.unwrap_or_else(|| LerpOrbitTransform {
-            orbit: new_tfm.get_orbit_position(),
-            pivot: new_tfm.pivot,
-        });
+        let old_lerp_tfm = self.lerp_tfm.unwrap_or_else(|| new_tfm.clone());
 
         let lead_weight = 1.0 - lag_weight;
-        let lerp_pos = old_lerp_tfm.orbit * lag_weight + new_tfm.get_orbit_position() * lead_weight;
-        let lerp_pivot = old_lerp_tfm.pivot * lag_weight + new_tfm.pivot * lead_weight;
-
-        let new_lerp_tfm = LerpOrbitTransform {
-            orbit: lerp_pos,
-            pivot: lerp_pivot,
+        let lerp_tfm = OrbitTransform {
+            orbit: old_lerp_tfm.orbit * lag_weight + new_tfm.orbit * lead_weight,
+            pivot: old_lerp_tfm.pivot * lag_weight + new_tfm.pivot * lead_weight,
         };
 
-        self.lerp_tfm = Some(new_lerp_tfm);
+        self.lerp_tfm = Some(lerp_tfm);
 
-        new_lerp_tfm
+        lerp_tfm
     }
-}
-
-#[derive(Clone, Copy)]
-pub struct LerpOrbitTransform {
-    pub orbit: Vec3,
-    pub pivot: Vec3,
-}
-
-impl LerpOrbitTransform {
-    pub fn pivot_look_at_orbit_transform(&self) -> Transform {
-        p1_look_at_p2_transform(self.pivot, self.orbit)
-    }
-
-    pub fn orbit_look_at_pivot_transform(&self) -> Transform {
-        p1_look_at_p2_transform(self.orbit, self.pivot)
-    }
-}
-
-pub fn p1_look_at_p2_transform(p1: Vec3, p2: Vec3) -> Transform {
-    // If p1 and p2 are very close, we avoid imprecision issues by keeping the look vector a unit
-    // vector.
-    let look_vector = (p2 - p1).normalize();
-    let look_at = p1 + look_vector;
-
-    Transform::from_translation(p1).looking_at(look_at, Vec3::unit_y())
 }
