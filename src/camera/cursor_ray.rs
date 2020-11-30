@@ -41,7 +41,7 @@ fn cursor_ray_system(
             camera_transform: camera_tfm.compute_matrix(),
             camera_projection: camera.projection_matrix,
         };
-        *cursor_ray = CursorRay(Some(data.ray(cursor_position.0)));
+        *cursor_ray = CursorRay(Some(data.ray(cursor_position.current)));
         *cursor_ray_calculator = CursorRayCalculator(Some(data));
     } else {
         *cursor_ray = CursorRay::default();

@@ -26,9 +26,9 @@ fn initialize_camera(commands: &mut Commands) {
     let eye = Vec3::new(100.0, 100.0, 100.0);
     let target = Vec3::new(0.0, 0.0, 0.0);
     let control_config = ControlConfig {
-        mouse_rotate_sensitivity: 0.005,
-        mouse_translate_sensitivity: 0.5,
-        trackpad_translate_sensitivity: 0.5,
+        mouse_rotate_sensitivity: 0.002,
+        mouse_translate_sensitivity: 0.1,
+        trackpad_translate_sensitivity: 0.1,
         smoothing_weight: 0.9,
     };
     create_camera_entity(commands, control_config, eye, target);

@@ -14,7 +14,16 @@ impl Plugin for CursorPositionPlugin {
 }
 
 #[derive(Default)]
-pub struct CursorPosition(pub Vec2);
+pub struct CursorPosition {
+    pub current: Vec2,
+    pub previous: Vec2,
+}
+
+impl CursorPosition {
+    pub fn frame_delta(&self) -> Vec2 {
+        self.current - self.previous
+    }
+}
 
 fn cursor_tracker_system(
     cursor_moved_events: Res<Events<CursorMoved>>,
@@ -22,6 +31,7 @@ fn cursor_tracker_system(
 ) {
     let mut cursor_reader = EventReader::default();
     if let Some(event) = cursor_reader.latest(&cursor_moved_events) {
-        cursor_position.0 = event.position;
+        cursor_position.previous = cursor_position.current;
+        cursor_position.current = event.position;
     }
 }

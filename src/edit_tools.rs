@@ -7,10 +7,10 @@ pub use plugin::EditToolsPlugin;
 use drag_face::DragFaceState;
 
 pub enum CurrentTool {
-    Erase, // TODO: drag the selection to erase
     DragFace(DragFaceState),
     PaintMaterial, // TODO
     Tile,          // TODO: tile the current buffer by dragging; replaces DragFace
+    Slope,         // TODO: select two edges to slope between
     Brush,         // TODO: organic brushes
 }
 
