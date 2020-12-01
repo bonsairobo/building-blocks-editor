@@ -13,4 +13,7 @@ pub fn undo_system(
     if keys.just_pressed(KeyCode::U) {
         edit_timeline.undo(&mut editor);
     }
+    if keys.just_pressed(KeyCode::R) {
+        edit_timeline.redo(&mut editor);
+    }
 }

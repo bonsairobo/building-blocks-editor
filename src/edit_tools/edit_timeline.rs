@@ -71,22 +71,45 @@ impl EditTimeline {
         let finalized_snapshot =
             std::mem::replace(&mut self.current_snapshot, Snapshot::new(chunk_shape));
         self.undo_queue.push_back(finalized_snapshot);
+
+        // We don't want to keep "undone edits" before this new one.
+        self.redo_queue.clear();
     }
 
     pub fn undo(&mut self, editor: &mut VoxelEditor<SdfVoxel>) {
-        if let Some(snapshot) = self.undo_queue.pop_back() {
-            for (chunk_key, chunk) in snapshot.voxels.chunks.into_iter() {
-                match chunk {
-                    MaybeCompressed::Compressed(c) => {
-                        editor.insert_chunk_and_touch_neighbors(chunk_key, c.decompress().array);
-                    }
-                    MaybeCompressed::Decompressed(c) => {
-                        // TODO: assert only compressed
-                        editor.insert_chunk_and_touch_neighbors(chunk_key, c.array);
-                    }
+        reversible_do(&mut self.undo_queue, &mut self.redo_queue, editor)
+    }
+
+    pub fn redo(&mut self, editor: &mut VoxelEditor<SdfVoxel>) {
+        reversible_do(&mut self.redo_queue, &mut self.undo_queue, editor)
+    }
+}
+
+fn reversible_do(
+    do_queue: &mut VecDeque<Snapshot>,
+    undo_queue: &mut VecDeque<Snapshot>,
+    editor: &mut VoxelEditor<SdfVoxel>,
+) {
+    if let Some(snapshot) = do_queue.pop_back() {
+        let mut redo_snap_chunks = default_chunk_map(*snapshot.voxels.chunk_shape());
+        for (chunk_key, chunk) in snapshot.voxels.chunks.into_iter() {
+            match chunk {
+                MaybeCompressed::Compressed(c) => {
+                    editor.insert_chunk_and_touch_neighbors(chunk_key, c.decompress().array);
+                }
+                MaybeCompressed::Decompressed(c) => {
+                    // TODO: assert only compressed
+                    editor.insert_chunk_and_touch_neighbors(chunk_key, c.array);
                 }
             }
+
+            if let Some(chunk) = editor.map.voxels.copy_chunk_without_caching(&chunk_key) {
+                redo_snap_chunks.insert_chunk(chunk_key, chunk);
+            }
         }
+        undo_queue.push_back(Snapshot {
+            voxels: redo_snap_chunks,
+        });
     }
 }
 
