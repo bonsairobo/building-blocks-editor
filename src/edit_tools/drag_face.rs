@@ -1,4 +1,4 @@
-use super::{selection::SelectionState, CurrentTool};
+use super::{edit_timeline::SnapshottingVoxelEditor, selection::SelectionState, CurrentTool};
 
 use crate::{
     camera::CursorRay,
@@ -8,7 +8,6 @@ use crate::{
 };
 
 use bevy::{ecs::prelude::*, input::prelude::*};
-use bevy_building_blocks::VoxelEditor;
 use building_blocks::{
     core::{prelude::*, SignedAxis3},
     mesh::OrientedCubeFace,
@@ -26,7 +25,7 @@ pub enum DragFaceState {
 
 pub fn drag_face_tool_system(
     mut current_tool: ResMut<CurrentTool>,
-    mut voxel_editor: VoxelEditor<SdfVoxel>,
+    mut voxel_editor: SnapshottingVoxelEditor,
     mut selection_state: ResMut<SelectionState>,
     voxel_cursor: VoxelCursor,
     cursor_ray: Res<CursorRay>,
@@ -117,6 +116,7 @@ pub fn drag_face_tool_system(
 
             if voxel_cursor.mouse_input.just_released(MouseButton::Left) {
                 // Done dragging.
+                voxel_editor.finish_edit();
                 *state = DragFaceState::SelectionReady;
                 *selection_state = SelectionState::SelectingFirstCorner;
             }

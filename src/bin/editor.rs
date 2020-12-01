@@ -1,6 +1,6 @@
 use building_blocks_editor::{
     BVTPlugin, CameraPlugin, CursorPositionPlugin, EditToolsPlugin, ImmediateModePlugin,
-    SdfVoxelTypeInfo, SmoothMeshPlugin, VoxelPickingPlugin,
+    SdfVoxelTypeInfo, SmoothMeshPlugin, VoxelPickingPlugin, VOXEL_CHUNK_SHAPE,
 };
 
 use bevy::{ecs::IntoSystem, prelude::*};
@@ -35,8 +35,6 @@ fn main() {
 
     app_builder.run();
 }
-
-const VOXEL_CHUNK_SHAPE: Point3i = PointN([16; 3]);
 
 fn initialize_editor(commands: &mut Commands) {
     // TODO: load from file

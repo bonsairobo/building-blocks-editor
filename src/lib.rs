@@ -12,5 +12,5 @@ pub use edit_tools::EditToolsPlugin;
 pub use immediate_mode::{ImmediateModePlugin, ImmediateModeTag};
 pub use voxel::{
     BVTPlugin, SdfVoxel, SdfVoxelType, SdfVoxelTypeInfo, SmoothMeshPlugin, VoxelBVT,
-    VoxelCursorRayImpact, VoxelDistance, VoxelPickingPlugin, EMPTY_SDF_VOXEL,
+    VoxelCursorRayImpact, VoxelDistance, VoxelPickingPlugin, EMPTY_SDF_VOXEL, VOXEL_CHUNK_SHAPE,
 };

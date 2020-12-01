@@ -1,6 +1,8 @@
 mod drag_face;
+mod edit_timeline;
 mod plugin;
 mod selection;
+mod undo;
 
 pub use plugin::EditToolsPlugin;
 
@@ -13,8 +15,6 @@ pub enum CurrentTool {
     Slope,         // TODO: select two edges to slope between
     Brush,         // TODO: organic brushes
 }
-
-// TODO: undo/redo history
 
 // TODO: 3D selection; like the drag face tool, but you drag to size the 3rd dimension of the
 // selection. Move the selection by dragging a face. Allow visibility masking so you can only see

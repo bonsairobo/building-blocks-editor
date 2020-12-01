@@ -16,6 +16,7 @@ pub struct MouseCameraController {
     control_config: ControlConfig,
     transform: OrbitTransform,
     smoother: Smoother,
+    enabled: bool,
 }
 
 impl MouseCameraController {
@@ -24,6 +25,7 @@ impl MouseCameraController {
             control_config,
             transform: OrbitTransform { pivot, orbit },
             smoother: Default::default(),
+            enabled: true,
         }
     }
 }
@@ -54,15 +56,20 @@ pub fn mouse_camera_control_system(
         control_config,
         transform,
         smoother,
+        enabled,
     } = &mut *camera;
 
-    let look_vector = (transform.orbit - transform.pivot).normalize();
-    let mut polar_vector = PolarVector::from_vector(look_vector);
-    let forward_vector = Vec3::new(look_vector.x, 0.0, look_vector.z).normalize();
+    if keys.just_pressed(KeyCode::C) {
+        *enabled = !*enabled;
+    }
 
     // We must be pressing the camera button for anything to take effect.
-    if keys.pressed(KeyCode::C) {
+    if *enabled {
         let cursor_delta = cursor_position.frame_delta();
+
+        let look_vector = (transform.orbit - transform.pivot).normalize();
+        let mut polar_vector = PolarVector::from_vector(look_vector);
+        let forward_vector = Vec3::new(look_vector.x, 0.0, look_vector.z).normalize();
 
         if mouse_buttons.pressed(MouseButton::Left) && !mouse_buttons.pressed(MouseButton::Right) {
             // Drag translates forward/backward and rotates about the Y axis.
