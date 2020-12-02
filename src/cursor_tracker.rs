@@ -29,9 +29,10 @@ fn cursor_tracker_system(
     cursor_moved_events: Res<Events<CursorMoved>>,
     mut cursor_position: ResMut<CursorPosition>,
 ) {
+    cursor_position.previous = cursor_position.current;
+
     let mut cursor_reader = EventReader::default();
     if let Some(event) = cursor_reader.latest(&cursor_moved_events) {
-        cursor_position.previous = cursor_position.current;
         cursor_position.current = event.position;
     }
 }
