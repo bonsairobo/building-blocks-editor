@@ -2,7 +2,7 @@ use crate::{voxel::SdfVoxel, VOXEL_CHUNK_SHAPE};
 
 use bevy::ecs::{prelude::*, SystemParam};
 use bevy_building_blocks::{default_array, default_chunk_map, VoxelEditor};
-use building_blocks::{prelude::*, storage::compressible_map::MaybeCompressed};
+use building_blocks::prelude::*;
 use std::collections::VecDeque;
 
 #[derive(SystemParam)]
@@ -12,11 +12,6 @@ pub struct SnapshottingVoxelEditor<'a> {
 }
 
 impl<'a> SnapshottingVoxelEditor<'a> {
-    pub fn edit_extent(&mut self, extent: Extent3i, edit_func: impl FnMut(Point3i, &mut SdfVoxel)) {
-        self.add_extent_to_snapshot(extent);
-        self.editor.edit_extent(extent, edit_func);
-    }
-
     pub fn edit_extent_and_touch_neighbors(
         &mut self,
         extent: Extent3i,
@@ -33,10 +28,11 @@ impl<'a> SnapshottingVoxelEditor<'a> {
 
         // TODO: compress all snapshotted chunks
         for chunk_key in map_voxels.chunk_keys_for_extent(&extent) {
-            snapshot_voxels.chunks.get_or_insert_with(chunk_key, || {
+            snapshot_voxels.get_mut_chunk_or_insert_with(chunk_key, |_, _| {
                 map_voxels
                     // This chunk will eventually get cached after being written by the editor.
                     .copy_chunk_without_caching(&chunk_key)
+                    .map(|c| c.as_decompressed())
                     .unwrap_or(Chunk3::with_array(default_array(
                         map_voxels.extent_for_chunk_at_key(&chunk_key),
                     )))
@@ -92,19 +88,10 @@ fn reversible_do(
 ) {
     if let Some(snapshot) = do_queue.pop_back() {
         let mut redo_snap_chunks = default_chunk_map(*snapshot.voxels.chunk_shape());
-        for (chunk_key, chunk) in snapshot.voxels.chunks.into_iter() {
-            match chunk {
-                MaybeCompressed::Compressed(c) => {
-                    editor.insert_chunk_and_touch_neighbors(chunk_key, c.decompress().array);
-                }
-                MaybeCompressed::Decompressed(c) => {
-                    // TODO: assert only compressed
-                    editor.insert_chunk_and_touch_neighbors(chunk_key, c.array);
-                }
-            }
-
-            if let Some(chunk) = editor.map.voxels.copy_chunk_without_caching(&chunk_key) {
-                redo_snap_chunks.insert_chunk(chunk_key, chunk);
+        for (chunk_key, chunk) in snapshot.voxels.into_chunk_iter() {
+            editor.insert_chunk_and_touch_neighbors(chunk_key, chunk.as_decompressed().array);
+            if let Some(old_chunk) = editor.map.voxels.copy_chunk_without_caching(&chunk_key) {
+                redo_snap_chunks.insert_chunk(chunk_key, old_chunk.as_decompressed());
             }
         }
         undo_queue.push_back(Snapshot {

@@ -28,6 +28,14 @@ impl MouseCameraController {
             enabled: true,
         }
     }
+
+    pub fn disable(&mut self) {
+        self.enabled = false;
+    }
+
+    pub fn enable(&mut self) {
+        self.enabled = true;
+    }
 }
 
 #[derive(Deserialize, Serialize)]

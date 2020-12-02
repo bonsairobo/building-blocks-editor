@@ -1,3 +1,5 @@
+use crate::camera::MouseCameraController;
+
 use super::{edit_timeline::SnapshottingVoxelEditor, selection::SelectionState, CurrentTool};
 
 use crate::{
@@ -27,6 +29,7 @@ pub fn drag_face_tool_system(
     mut current_tool: ResMut<CurrentTool>,
     mut voxel_editor: SnapshottingVoxelEditor,
     mut selection_state: ResMut<SelectionState>,
+    mut mouse_camera_controllers: Query<&mut MouseCameraController>,
     voxel_cursor: VoxelCursor,
     cursor_ray: Res<CursorRay>,
 ) {
@@ -50,6 +53,9 @@ pub fn drag_face_tool_system(
 
             if let Some(voxel_face) = voxel_cursor.voxel_just_pressed(MouseButton::Left) {
                 if quad_extent.contains(&voxel_face.point) {
+                    if let Some(mut controller) = mouse_camera_controllers.iter_mut().next() {
+                        controller.disable();
+                    }
                     *state = DragFaceState::DraggingFace {
                         quad_extent,
                         normal,
@@ -116,6 +122,9 @@ pub fn drag_face_tool_system(
 
             if voxel_cursor.mouse_input.just_released(MouseButton::Left) {
                 // Done dragging.
+                if let Some(mut controller) = mouse_camera_controllers.iter_mut().next() {
+                    controller.enable();
+                }
                 voxel_editor.finish_edit();
                 *state = DragFaceState::SelectionReady;
                 *selection_state = SelectionState::SelectingFirstCorner;
