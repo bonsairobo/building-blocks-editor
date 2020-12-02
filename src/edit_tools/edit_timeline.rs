@@ -1,49 +1,10 @@
 use crate::{voxel::SdfVoxel, VOXEL_CHUNK_SHAPE};
 
-use bevy::ecs::{prelude::*, SystemParam};
 use bevy_building_blocks::{default_array, default_chunk_map, VoxelEditor};
 use building_blocks::prelude::*;
 use std::collections::VecDeque;
 
-#[derive(SystemParam)]
-pub struct SnapshottingVoxelEditor<'a> {
-    editor: VoxelEditor<'a, SdfVoxel>,
-    timeline: ResMut<'a, EditTimeline>,
-}
-
-impl<'a> SnapshottingVoxelEditor<'a> {
-    pub fn edit_extent_and_touch_neighbors(
-        &mut self,
-        extent: Extent3i,
-        edit_func: impl FnMut(Point3i, &mut SdfVoxel),
-    ) {
-        self.add_extent_to_snapshot(extent);
-        self.editor
-            .edit_extent_and_touch_neighbors(extent, edit_func);
-    }
-
-    fn add_extent_to_snapshot(&mut self, extent: Extent3i) {
-        let map_voxels = &self.editor.map.voxels;
-        let snapshot_voxels = &mut self.timeline.current_snapshot.voxels;
-
-        // TODO: compress all snapshotted chunks
-        for chunk_key in map_voxels.chunk_keys_for_extent(&extent) {
-            snapshot_voxels.get_mut_chunk_or_insert_with(chunk_key, |_, _| {
-                map_voxels
-                    // This chunk will eventually get cached after being written by the editor.
-                    .copy_chunk_without_caching(&chunk_key)
-                    .map(|c| c.as_decompressed())
-                    .unwrap_or(Chunk3::with_array(default_array(
-                        map_voxels.extent_for_chunk_at_key(&chunk_key),
-                    )))
-            });
-        }
-    }
-
-    pub fn finish_edit(&mut self) {
-        self.timeline.store_current_snapshot();
-    }
-}
+// TODO: limit the memory usage of the timeline somehow
 
 pub struct EditTimeline {
     undo_queue: VecDeque<Snapshot>,
@@ -78,6 +39,22 @@ impl EditTimeline {
 
     pub fn redo(&mut self, editor: &mut VoxelEditor<SdfVoxel>) {
         reversible_do(&mut self.redo_queue, &mut self.undo_queue, editor)
+    }
+
+    pub fn add_extent_to_snapshot(&mut self, extent: Extent3i, src_map: &ChunkMap3<SdfVoxel>) {
+        for chunk_key in src_map.chunk_keys_for_extent(&extent) {
+            self.current_snapshot
+                .voxels
+                .get_mut_chunk_or_insert_with(chunk_key, |_, _| {
+                    src_map
+                        // This chunk will eventually get cached after being written by the editor.
+                        .copy_chunk_without_caching(&chunk_key)
+                        .map(|c| c.as_decompressed())
+                        .unwrap_or(Chunk3::with_array(default_array(
+                            src_map.extent_for_chunk_at_key(&chunk_key),
+                        )))
+                });
+        }
     }
 }
 

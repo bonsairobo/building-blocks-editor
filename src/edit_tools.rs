@@ -2,11 +2,13 @@ mod drag_face;
 mod edit_timeline;
 mod plugin;
 mod selection;
+mod snapshotting_editor;
 mod undo;
 
 pub use plugin::EditToolsPlugin;
 
 use drag_face::DragFaceState;
+use snapshotting_editor::SnapshottingVoxelEditor;
 
 pub enum CurrentTool {
     DragFace(DragFaceState),

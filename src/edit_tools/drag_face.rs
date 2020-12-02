@@ -1,6 +1,6 @@
 use crate::camera::MouseCameraController;
 
-use super::{edit_timeline::SnapshottingVoxelEditor, selection::SelectionState, CurrentTool};
+use super::{selection::SelectionState, CurrentTool, SnapshottingVoxelEditor};
 
 use crate::{
     camera::CursorRay,
