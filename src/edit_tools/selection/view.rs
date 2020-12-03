@@ -1,20 +1,20 @@
 use super::SelectionState;
 
 use crate::{
-    mesh::create_single_quad_mesh_pbr_bundle, voxel::offset_transform, ImmediateModeTag,
-    VoxelCursorRayImpact,
+    mesh::create_single_quad_mesh_bundle, rendering::ArrayMaterial, voxel::offset_transform,
+    ImmediateModeTag, VoxelCursorRayImpact,
 };
 
-use bevy::{asset::prelude::*, ecs::prelude::*, pbr::prelude::*, render::prelude::*};
+use bevy::{asset::prelude::*, ecs::prelude::*, render::prelude::*};
 use building_blocks::mesh::{OrientedCubeFace, UnorientedQuad};
 
 pub fn initialize_selection_view(
     commands: &mut Commands,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<ArrayMaterial>>,
 ) {
     let mut color = Color::BLUE;
     color.set_a(0.5);
-    let material = SelectionCursorMaterial(materials.add(StandardMaterial::from(color)));
+    let material = SelectionCursorMaterial(materials.add(ArrayMaterial::from(color)));
     commands.insert_resource(material);
 }
 
@@ -64,17 +64,17 @@ pub fn selection_view_system(
     }
 }
 
-pub struct SelectionCursorMaterial(pub Handle<StandardMaterial>);
+pub struct SelectionCursorMaterial(pub Handle<ArrayMaterial>);
 
 fn create_quad_selection_hint_entity(
     quad: &UnorientedQuad,
     face: &OrientedCubeFace,
-    material: Handle<StandardMaterial>,
+    material: Handle<ArrayMaterial>,
     commands: &mut Commands,
     meshes: &mut Assets<Mesh>,
 ) -> Entity {
     commands
-        .spawn(create_single_quad_mesh_pbr_bundle(
+        .spawn(create_single_quad_mesh_bundle(
             &face, &quad, material, meshes,
         ))
         .with(offset_transform(face.mesh_normal() * HOVER_DISTANCE))

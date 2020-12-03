@@ -1,4 +1,4 @@
-use crate::mesh::create_pos_norm_mesh_pbr_bundle;
+use crate::{mesh::create_voxel_pos_norm_mesh_bundle, rendering::ArrayMaterial};
 
 use bevy_building_blocks::{
     DirtyChunks, ThreadLocalResource, ThreadLocalVoxelCache, Voxel, VoxelMap,
@@ -10,8 +10,7 @@ use building_blocks::prelude::*;
 use fnv::FnvHashMap;
 use std::cell::RefCell;
 
-/// Generates smooth meshes for voxel chunks. When a chunk becomes dirty, its old mesh is replaced
-/// with a newly generated one.
+/// Generates smooth meshes for voxel chunks. When a chunk becomes dirty, its old mesh is replaced with a newly generated one.
 pub struct SmoothMeshPlugin<V: Voxel> {
     marker: std::marker::PhantomData<V>,
 }
@@ -34,9 +33,9 @@ impl<V: Voxel + SignedDistance> Plugin for SmoothMeshPlugin<V> {
 
 fn initialize_mesh_generator<V>(
     commands: &mut Commands,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<ArrayMaterial>>,
 ) {
-    let material = MeshMaterial(materials.add(StandardMaterial::from(Color::RED)));
+    let material = MeshMaterial(materials.add(ArrayMaterial::from(Color::RED)));
     commands.insert_resource(material);
 }
 
@@ -71,7 +70,7 @@ fn mesh_generator_system<V: Voxel + SignedDistance>(
             chunk_meshes.entities.insert(
                 chunk_key,
                 commands
-                    .spawn(create_pos_norm_mesh_pbr_bundle(
+                    .spawn(create_voxel_pos_norm_mesh_bundle(
                         mesh,
                         mesh_material.0.clone(),
                         &mut *meshes,
@@ -129,4 +128,4 @@ fn generate_mesh_for_each_chunk<V: Voxel + SignedDistance>(
 type ThreadLocalMeshBuffers = ThreadLocalResource<RefCell<SurfaceNetsBuffer>>;
 
 #[derive(Default)]
-pub struct MeshMaterial(pub Handle<StandardMaterial>);
+pub struct MeshMaterial(pub Handle<ArrayMaterial>);

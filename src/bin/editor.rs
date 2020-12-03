@@ -1,6 +1,7 @@
 use building_blocks_editor::{
     BVTPlugin, CameraPlugin, CursorPositionPlugin, EditToolsPlugin, ImmediateModePlugin,
-    SdfVoxelTypeInfo, SmoothMeshPlugin, VoxelPickingPlugin, VOXEL_CHUNK_SHAPE,
+    LightBundle, SdfVoxelTypeInfo, SmoothMeshPlugin, TriplanarRenderPlugin, VoxelPickingPlugin,
+    VOXEL_CHUNK_SHAPE,
 };
 
 use bevy::{ecs::IntoSystem, prelude::*};
@@ -21,6 +22,7 @@ fn main() {
         .add_resource(ClearColor(Color::rgb(0.3, 0.3, 0.3)))
         .add_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
+        .add_plugin(TriplanarRenderPlugin)
         .add_plugin(ImmediateModePlugin)
         .add_plugin(CursorPositionPlugin)
         .add_plugin(MapIoPlugin::<SdfVoxel>::new(
