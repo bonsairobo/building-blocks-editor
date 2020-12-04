@@ -27,7 +27,7 @@ use bevy::render::{
 };
 use bevy::transform::prelude::GlobalTransform;
 
-pub(crate) fn add_voxel_render_graph(graph: &mut RenderGraph, resources: &Resources) {
+pub(crate) fn add_triplanar_render_graph(graph: &mut RenderGraph, resources: &Resources) {
     graph.add_system_node(
         node::TRANSFORM,
         RenderResourcesNode::<GlobalTransform>::new(true),

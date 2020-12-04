@@ -8,7 +8,7 @@ pub use array_material::*;
 pub use entity::*;
 pub use light::*;
 
-use render_graph::add_voxel_render_graph;
+use render_graph::add_triplanar_render_graph;
 
 pub mod prelude {
     pub use super::{array_material::ArrayMaterial, entity::*, light::Light};
@@ -33,6 +33,6 @@ impl Plugin for TriplanarRenderPlugin {
             .init_resource::<AmbientLight>();
         let resources = app.resources();
         let mut render_graph = resources.get_mut::<RenderGraph>().unwrap();
-        add_voxel_render_graph(&mut render_graph, resources);
+        add_triplanar_render_graph(&mut render_graph, resources);
     }
 }
