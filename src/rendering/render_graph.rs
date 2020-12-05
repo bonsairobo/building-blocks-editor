@@ -4,14 +4,14 @@ mod lights_node;
 pub use forward_pipeline::*;
 pub use lights_node::*;
 
-/// the names of pbr graph nodes
+/// the names of graph nodes
 pub mod node {
     pub const TRANSFORM: &str = "transform";
     pub const ARRAY_MATERIAL: &str = "standard_material";
     pub const LIGHTS: &str = "lights";
 }
 
-/// the names of pbr uniforms
+/// the names of uniforms
 pub mod uniform {
     pub const LIGHTS: &str = "Lights";
 }

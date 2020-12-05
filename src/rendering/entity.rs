@@ -26,7 +26,7 @@ impl Default for TriplanarMeshBundle {
     fn default() -> Self {
         Self {
             render_pipelines: RenderPipelines::from_pipelines(vec![RenderPipeline::new(
-                FORWARD_PIPELINE_HANDLE,
+                FORWARD_PIPELINE_HANDLE.typed(),
             )]),
             mesh: Default::default(),
             material: Default::default(),

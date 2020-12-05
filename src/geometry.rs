@@ -1,7 +1,10 @@
 use approx::relative_eq;
 use bevy::math::prelude::*;
 
-pub use building_blocks::search::ncollide3d::{na, query::Ray as NCRay};
+pub use building_blocks::{
+    core::Point3f,
+    search::ncollide3d::{na, query::Ray as NCRay},
+};
 
 const PI: f32 = std::f32::consts::PI;
 
@@ -28,8 +31,8 @@ pub fn vectors_are_parallel(v1: Vec3, v2: Vec3) -> bool {
 impl From<Ray3> for NCRay<f32> {
     fn from(ray: Ray3) -> Self {
         NCRay::new(
-            mint::Point3::from(ray.origin).into(),
-            mint::Vector3::from(ray.direction).into(),
+            Point3f::from(ray.origin).into(),
+            Point3f::from(ray.direction).into(),
         )
     }
 }
