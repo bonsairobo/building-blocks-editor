@@ -98,10 +98,10 @@ fn generate_mesh_for_each_chunk<V: Voxel + SignedDistance>(
         for chunk_key in dirty_chunks.dirty_chunk_keys.iter().cloned() {
             s.spawn(async move {
                 let cache_tls = local_caches.get();
-                let reader = voxel_map.reader(&cache_tls);
+                let reader = voxel_map.read(&cache_tls);
 
                 let padded_chunk_extent =
-                    padded_surface_nets_chunk_extent(&reader.extent_for_chunk_at_key(&chunk_key));
+                    padded_surface_nets_chunk_extent(&reader.indexer.extent_for_chunk_at_key(chunk_key));
                 let mut padded_chunk = Array3::fill(padded_chunk_extent, V::default());
                 copy_extent(&padded_chunk_extent, &reader, &mut padded_chunk);
 
