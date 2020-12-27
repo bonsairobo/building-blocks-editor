@@ -63,15 +63,15 @@ fn add_editor_schedule(app: &mut AppBuilder) {
         .on_state_enter(EditorState::Editing, BVTPlugin::<SdfVoxel>::initialize)
         .on_state_enter(EditorState::Editing, VoxelPickingPlugin::initialize)
         .enter_stage(EditorState::Editing, |stage: &mut SystemStage| {
-            EditToolsPlugin::add_to_enter_stage(stage);
+            EditToolsPlugin::initialize_in_stage(stage);
 
             stage
         })
         .update_stage(EditorState::Editing, |stage: &mut SystemStage| {
-            MeshGeneratorPlugin::<SdfVoxel>::add_to_update_stage(stage);
-            EditToolsPlugin::add_to_update_stage(stage);
-            BVTPlugin::<SdfVoxel>::add_to_update_stage(stage);
-            VoxelPickingPlugin::add_to_update_stage(stage);
+            MeshGeneratorPlugin::<SdfVoxel>::update_in_stage(stage);
+            EditToolsPlugin::update_in_stage(stage);
+            BVTPlugin::<SdfVoxel>::update_in_stage(stage);
+            VoxelPickingPlugin::update_in_stage(stage);
 
             stage
         });

@@ -16,7 +16,7 @@ impl VoxelPickingPlugin {
             .insert_resource(VoxelCursorState::default());
     }
 
-    pub fn add_to_update_stage(stage: &mut SystemStage) {
+    pub fn update_in_stage(stage: &mut SystemStage) {
         stage
             .add_system(voxel_cursor_impact_system.system())
             .add_system(voxel_clicking_system.system());

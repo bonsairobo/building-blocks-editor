@@ -18,13 +18,13 @@ impl EditToolsPlugin {
             .insert_resource(CurrentTool::DragFace(DragFaceState::SelectionReady));
     }
 
-    pub fn add_to_enter_stage(stage: &mut SystemStage) {
-        SelectionPlugin::add_to_enter_stage(stage);
+    pub fn initialize_in_stage(stage: &mut SystemStage) {
+        SelectionPlugin::initialize_in_stage(stage);
         stage.add_system(Self::initialize);
     }
 
-    pub fn add_to_update_stage(stage: &mut SystemStage) {
-        SelectionPlugin::add_to_update_stage(stage);
+    pub fn update_in_stage(stage: &mut SystemStage) {
+        SelectionPlugin::update_in_stage(stage);
         stage
             .add_system(undo_system.system())
             .add_system(drag_face_tool_system.system());
