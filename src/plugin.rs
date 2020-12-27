@@ -1,6 +1,6 @@
 use crate::{
     create_camera_entity, CameraControlConfig, CameraPlugin, CursorPositionPlugin, EditToolsPlugin,
-    ImmediateModePlugin, SdfVoxelTypeInfo, VoxelPickingPlugin, VOXEL_CHUNK_SHAPE,
+    ImmediateModePlugin, SdfVoxelTypeInfo, VoxelMaterial, VoxelPickingPlugin, VOXEL_CHUNK_SHAPE,
 };
 
 use bevy::{
@@ -89,12 +89,30 @@ fn start_loading(commands: &mut Commands, asset_server: Res<AssetServer>) {
             voxels: empty_compressible_chunk_map::<SdfVoxel>(VOXEL_CHUNK_SHAPE),
             palette: VoxelPalette {
                 infos: vec![
-                    SdfVoxelTypeInfo { is_empty: true },
-                    SdfVoxelTypeInfo { is_empty: false },
+                    SdfVoxelTypeInfo {
+                        is_empty: true,
+                        material: VoxelMaterial::NULL,
+                    },
+                    SdfVoxelTypeInfo {
+                        is_empty: false,
+                        material: VoxelMaterial(0),
+                    },
+                    SdfVoxelTypeInfo {
+                        is_empty: false,
+                        material: VoxelMaterial(1),
+                    },
+                    SdfVoxelTypeInfo {
+                        is_empty: false,
+                        material: VoxelMaterial(2),
+                    },
+                    SdfVoxelTypeInfo {
+                        is_empty: false,
+                        material: VoxelMaterial(3),
+                    },
                 ],
             },
         })
-        .insert_resource(LoadingTexture(asset_server.load("rock.png")));
+        .insert_resource(LoadingTexture(asset_server.load("albedo.png")));
 }
 
 fn wait_for_assets_loaded(
@@ -115,7 +133,7 @@ fn wait_for_assets_loaded(
 }
 
 fn prepare_materials_texture(texture: &mut Texture) {
-    let num_layers = 1;
+    let num_layers = 4;
     texture.reinterpret_stacked_2d_as_array(num_layers);
     texture.sampler.address_mode_u = AddressMode::Repeat;
     texture.sampler.address_mode_v = AddressMode::Repeat;

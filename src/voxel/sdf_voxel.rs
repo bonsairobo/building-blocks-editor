@@ -84,6 +84,14 @@ pub const EMPTY_SDF_VOXEL: SdfVoxel = SdfVoxel {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct SdfVoxelTypeInfo {
     pub is_empty: bool,
+    pub material: VoxelMaterial,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+pub struct VoxelMaterial(pub u8);
+
+impl VoxelMaterial {
+    pub const NULL: Self = Self(std::u8::MAX);
 }
 
 impl IsEmpty for &SdfVoxelTypeInfo {

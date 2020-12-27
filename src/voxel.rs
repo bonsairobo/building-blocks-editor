@@ -5,7 +5,9 @@ mod sdf_voxel;
 // Systems that facilitate voxel post-processing.
 pub use geometry::{offset_transform, VoxelFace};
 pub use picking::{VoxelCursor, VoxelCursorRayImpact, VoxelPickingPlugin};
-pub use sdf_voxel::{SdfVoxel, SdfVoxelType, SdfVoxelTypeInfo, VoxelDistance, EMPTY_SDF_VOXEL};
+pub use sdf_voxel::{
+    SdfVoxel, SdfVoxelType, SdfVoxelTypeInfo, VoxelDistance, VoxelMaterial, EMPTY_SDF_VOXEL,
+};
 
 use building_blocks::core::{Point3i, PointN};
 
