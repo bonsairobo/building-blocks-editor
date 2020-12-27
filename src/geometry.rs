@@ -41,11 +41,11 @@ impl From<Ray3> for NCRay<f32> {
 /// space `point`.
 pub fn ray_from_window_point(
     point: Vec2,
-    screen_size: (u32, u32),
+    screen_size: (f32, f32),
     camera_transform_matrix: Mat4,
     camera_projection_matrix: Mat4,
 ) -> Ray3 {
-    let screen_size = Vec2::new(screen_size.0 as f32, screen_size.1 as f32);
+    let screen_size = Vec2::new(screen_size.0, screen_size.1);
 
     // Normalized device coordinates (NDC) describes cursor position from (-1, -1, -1) to (1, 1, 1).
     let cursor_pos_ndc: Vec3 = ((point / screen_size) * 2.0 - Vec2::from([1.0, 1.0])).extend(1.0);

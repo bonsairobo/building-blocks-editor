@@ -21,6 +21,10 @@ pub enum SelectionState {
     Invisible,
 }
 
+pub fn initialize_selection_controller(commands: &mut Commands) {
+    commands.insert_resource(SelectionState::SelectingFirstCorner);
+}
+
 pub fn selection_control_system(
     mut selection_state: ResMut<SelectionState>,
     voxel_cursor: VoxelCursor,

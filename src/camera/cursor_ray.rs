@@ -55,7 +55,7 @@ fn cursor_ray_system(
 pub struct CursorRayCalculator(pub Option<WindowCameraData>);
 
 pub struct WindowCameraData {
-    screen_size: (u32, u32),
+    screen_size: (f32, f32),
     camera_transform: Mat4,
     camera_projection: Mat4,
 }

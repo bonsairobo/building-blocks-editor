@@ -1,9 +1,6 @@
 use bevy_building_blocks::Voxel;
 
-use building_blocks::{
-    mesh::{MaterialVoxel, SignedDistance},
-    storage::IsEmpty,
-};
+use building_blocks::{mesh::SignedDistance, storage::IsEmpty};
 use serde::{Deserialize, Serialize};
 
 /// The data actually stored in each point of the voxel map.
@@ -93,9 +90,4 @@ impl IsEmpty for &SdfVoxelTypeInfo {
     fn is_empty(&self) -> bool {
         self.is_empty
     }
-}
-
-impl MaterialVoxel for &SdfVoxelTypeInfo {
-    type Material = ();
-    fn material(&self) -> Self::Material {}
 }

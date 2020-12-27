@@ -13,8 +13,6 @@ lto = true
 [dependencies]
 approx = "0.4"
 fnv = "1.0"
-glam = { version = "0.10", features = ["mint"] }
-mint = "0.5"
 serde = "1.0"
 thread_local = "1.0"
 
@@ -22,19 +20,26 @@ thread_local = "1.0"
 # version = "0.3"
 # path = "../bevy"
 git = "https://github.com/bevyengine/bevy"
-branch = "master"
+# branch = "master"
+rev = "51650f114fbf31fc89db7bd69542dc21edf2dcb7"
 
 [dependencies.building-blocks]
 git = "https://github.com/bonsairobo/building-blocks"
 branch = "main"
 # path = "../building-blocks"
 # version = "0.2.1"
-features = ["mesh", "glam", "nalgebra", "ncollide"]
+default-features = false
+features = ["glam", "nalgebra", "ncollide", "search"]
 
 [dependencies.bevy-building-blocks]
 git = "https://github.com/bonsairobo/bevy-building-blocks"
 branch = "main"
+features = ["ncollide"]
 # path = "../bevy-building-blocks"
+
+[dependencies.smooth-voxel-renderer]
+git = "https://github.com/bonsairobo/smooth-voxel-renderer"
+branch = "main"
 
 [features]
 default = []

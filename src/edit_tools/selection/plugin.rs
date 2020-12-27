@@ -1,17 +1,21 @@
 use super::{
-    controller::selection_control_system,
+    controller::{initialize_selection_controller, selection_control_system},
     view::{initialize_selection_view, selection_view_system},
-    SelectionState,
 };
 
-use bevy::{app::prelude::*, ecs::prelude::*};
+use bevy::ecs::prelude::*;
 
 pub struct SelectionPlugin;
 
-impl Plugin for SelectionPlugin {
-    fn build(&self, app: &mut AppBuilder) {
-        app.add_resource(SelectionState::SelectingFirstCorner)
-            .add_startup_system(initialize_selection_view.system())
+impl SelectionPlugin {
+    pub fn add_to_enter_stage(stage: &mut SystemStage) {
+        stage
+            .add_system(initialize_selection_controller.system())
+            .add_system(initialize_selection_view.system());
+    }
+
+    pub fn add_to_update_stage(stage: &mut SystemStage) {
+        stage
             .add_system(selection_control_system.system())
             .add_system(selection_view_system.system());
     }

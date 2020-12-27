@@ -1,20 +1,26 @@
 use super::SelectionState;
 
-use crate::{
-    mesh::create_single_quad_mesh_bundle, rendering::ArrayMaterial, voxel::offset_transform,
-    ImmediateModeTag, VoxelCursorRayImpact,
-};
+use crate::{voxel::offset_transform, ImmediateModeTag, VoxelCursorRayImpact};
 
-use bevy::{asset::prelude::*, ecs::prelude::*, render::prelude::*};
-use building_blocks::mesh::{OrientedCubeFace, UnorientedQuad};
+use bevy::{
+    asset::prelude::*,
+    ecs::prelude::*,
+    pbr::prelude::*,
+    render::{
+        mesh::{Indices, VertexAttributeValues},
+        pipeline::PrimitiveTopology,
+        prelude::*,
+    },
+};
+use building_blocks::mesh::{OrientedCubeFace, PosNormMesh, UnorientedQuad};
 
 pub fn initialize_selection_view(
     commands: &mut Commands,
-    mut materials: ResMut<Assets<ArrayMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mut color = Color::BLUE;
+    let mut color = Color::YELLOW;
     color.set_a(0.5);
-    let material = SelectionCursorMaterial(materials.add(ArrayMaterial::from(color)));
+    let material = SelectionCursorMaterial(materials.add(StandardMaterial::from(color)));
     commands.insert_resource(material);
 }
 
@@ -64,12 +70,12 @@ pub fn selection_view_system(
     }
 }
 
-pub struct SelectionCursorMaterial(pub Handle<ArrayMaterial>);
+pub struct SelectionCursorMaterial(pub Handle<StandardMaterial>);
 
 fn create_quad_selection_hint_entity(
     quad: &UnorientedQuad,
     face: &OrientedCubeFace,
-    material: Handle<ArrayMaterial>,
+    material: Handle<StandardMaterial>,
     commands: &mut Commands,
     meshes: &mut Assets<Mesh>,
 ) -> Entity {
@@ -83,4 +89,35 @@ fn create_quad_selection_hint_entity(
         .unwrap()
 }
 
-const HOVER_DISTANCE: f32 = 0.5;
+const HOVER_DISTANCE: f32 = 0.2;
+
+fn create_single_quad_mesh_bundle(
+    face: &OrientedCubeFace,
+    quad: &UnorientedQuad,
+    material: Handle<StandardMaterial>,
+    meshes: &mut Assets<Mesh>,
+) -> PbrBundle {
+    let mut mesh = PosNormMesh::default();
+    face.add_quad_to_pos_norm_mesh(quad, &mut mesh);
+
+    let num_vertices = mesh.positions.len();
+
+    let mut render_mesh = Mesh::new(PrimitiveTopology::TriangleList);
+    render_mesh.set_attribute(
+        "Vertex_Position",
+        VertexAttributeValues::Float3(mesh.positions),
+    );
+    render_mesh.set_attribute("Vertex_Normal", VertexAttributeValues::Float3(mesh.normals));
+    // XXX: We have to provide UVs, even though we don't use them.
+    render_mesh.set_attribute(
+        "Vertex_Uv",
+        VertexAttributeValues::Float2(vec![[0.0; 2]; num_vertices]),
+    );
+    render_mesh.set_indices(Some(Indices::U32(mesh.indices)));
+
+    PbrBundle {
+        mesh: meshes.add(render_mesh),
+        material,
+        ..Default::default()
+    }
+}

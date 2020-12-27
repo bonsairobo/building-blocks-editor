@@ -4,15 +4,20 @@ use super::{
     VoxelCursorRayImpact,
 };
 
-use bevy::{app::prelude::*, ecs::prelude::*};
+use bevy::ecs::prelude::*;
 
 /// Manages the `VoxelCursorRayImpact` and `VoxelCursorState` resources.
 pub struct VoxelPickingPlugin;
 
-impl Plugin for VoxelPickingPlugin {
-    fn build(&self, app: &mut AppBuilder) {
-        app.add_resource(VoxelCursorRayImpact::default())
-            .add_resource(VoxelCursorState::default())
+impl VoxelPickingPlugin {
+    pub fn initialize(commands: &mut Commands) {
+        commands
+            .insert_resource(VoxelCursorRayImpact::default())
+            .insert_resource(VoxelCursorState::default());
+    }
+
+    pub fn add_to_update_stage(stage: &mut SystemStage) {
+        stage
             .add_system(voxel_cursor_impact_system.system())
             .add_system(voxel_clicking_system.system());
     }

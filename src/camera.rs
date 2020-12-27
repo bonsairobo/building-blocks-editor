@@ -2,41 +2,27 @@ mod controller;
 mod cursor_ray;
 mod orbit_transform;
 
-pub use controller::{mouse_camera_control_system, ControlConfig, MouseCameraController};
-pub use cursor_ray::{CursorRay, CursorRayCalculator};
+pub use controller::{mouse_camera_control_system, CameraControlConfig, MouseCameraController};
+pub use cursor_ray::{CursorRay, CursorRayCalculator, CursorRayCameraTag};
 
-use cursor_ray::{CursorRayCameraTag, CursorRayPlugin};
+use cursor_ray::CursorRayPlugin;
 
 use bevy::{
-    app::prelude::*, ecs::prelude::*, math::prelude::*, render::entity::Camera3dBundle,
-    transform::components::Transform,
+    app::prelude::*, ecs::prelude::*, math::prelude::*, render::prelude::*, transform::prelude::*,
 };
 
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_startup_system(initialize_camera.system())
-            .add_system(mouse_camera_control_system.system())
+        app.add_system(mouse_camera_control_system.system())
             .add_plugin(CursorRayPlugin);
     }
 }
 
-fn initialize_camera(commands: &mut Commands) {
-    let eye = Vec3::new(100.0, 100.0, 100.0);
-    let target = Vec3::new(0.0, 0.0, 0.0);
-    let control_config = ControlConfig {
-        mouse_rotate_sensitivity: 0.002,
-        mouse_translate_sensitivity: 0.1,
-        trackpad_translate_sensitivity: 0.1,
-        smoothing_weight: 0.9,
-    };
-    create_camera_entity(commands, control_config, eye, target);
-}
-
-fn create_camera_entity(
+pub fn create_camera_entity(
     commands: &mut Commands,
-    control_config: ControlConfig,
+    control_config: CameraControlConfig,
     eye: Vec3,
     target: Vec3,
 ) -> Entity {

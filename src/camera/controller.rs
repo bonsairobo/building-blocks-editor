@@ -13,14 +13,14 @@ use serde::{Deserialize, Serialize};
 
 /// A camera controlled with the mouse in the same way as Unreal Engine's viewport controller.
 pub struct MouseCameraController {
-    control_config: ControlConfig,
+    control_config: CameraControlConfig,
     transform: OrbitTransform,
     smoother: Smoother,
     enabled: bool,
 }
 
 impl MouseCameraController {
-    pub fn new(control_config: ControlConfig, pivot: Vec3, orbit: Vec3) -> Self {
+    pub fn new(control_config: CameraControlConfig, pivot: Vec3, orbit: Vec3) -> Self {
         Self {
             control_config,
             transform: OrbitTransform { pivot, orbit },
@@ -39,7 +39,7 @@ impl MouseCameraController {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct ControlConfig {
+pub struct CameraControlConfig {
     pub mouse_rotate_sensitivity: f32,
     pub mouse_translate_sensitivity: f32,
     pub trackpad_translate_sensitivity: f32,

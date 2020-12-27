@@ -34,14 +34,18 @@ impl EditTimeline {
     }
 
     pub fn undo(&mut self, editor: &mut VoxelEditor<SdfVoxel>) {
-        reversible_do(&mut self.undo_queue, &mut self.redo_queue, editor)
+        reversible_restore_snapshot(&mut self.undo_queue, &mut self.redo_queue, editor)
     }
 
     pub fn redo(&mut self, editor: &mut VoxelEditor<SdfVoxel>) {
-        reversible_do(&mut self.redo_queue, &mut self.undo_queue, editor)
+        reversible_restore_snapshot(&mut self.redo_queue, &mut self.undo_queue, editor)
     }
 
-    pub fn add_extent_to_snapshot(&mut self, extent: Extent3i, src_map: &CompressibleChunkMap3<SdfVoxel>) {
+    pub fn add_extent_to_snapshot(
+        &mut self,
+        extent: Extent3i,
+        src_map: &CompressibleChunkMap3<SdfVoxel>,
+    ) {
         for chunk_key in src_map.indexer.chunk_keys_for_extent(&extent) {
             self.current_snapshot
                 .voxels
@@ -59,7 +63,7 @@ impl EditTimeline {
     }
 }
 
-fn reversible_do(
+fn reversible_restore_snapshot(
     do_queue: &mut VecDeque<Snapshot>,
     undo_queue: &mut VecDeque<Snapshot>,
     editor: &mut VoxelEditor<SdfVoxel>,
@@ -71,9 +75,16 @@ fn reversible_do(
         let mut redo_snap_chunks = empty_chunk_hash_map(indexer.chunk_shape());
         for (chunk_key, chunk) in storage.into_iter() {
             editor.insert_chunk_and_touch_neighbors(chunk_key, chunk.array);
-            if let Some(old_chunk) = editor.map.voxels.storage().copy_without_caching(&chunk_key) {
-                redo_snap_chunks.write_chunk(chunk_key, old_chunk.as_decompressed());
-            }
+            let old_chunk = editor
+                .map
+                .voxels
+                .storage()
+                .copy_without_caching(&chunk_key)
+                .map(|c| c.as_decompressed())
+                .unwrap_or(Chunk3::with_array(default_array(
+                    indexer.extent_for_chunk_at_key(chunk_key),
+                )));
+            redo_snap_chunks.write_chunk(chunk_key, old_chunk);
         }
         undo_queue.push_back(Snapshot {
             voxels: redo_snap_chunks,
