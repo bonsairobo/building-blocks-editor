@@ -152,7 +152,7 @@ fn initialize_editor(commands: &mut Commands, mut voxel_editor: VoxelEditor<SdfV
     println!("Initializing voxels");
     let write_extent = Extent3i::from_min_and_shape(PointN([0, 0, 0]), PointN([64, 64, 64]));
     voxel_editor.edit_extent_and_touch_neighbors(write_extent, |_p, voxel| {
-        *voxel = SdfVoxel::new(SdfVoxelType(1), VoxelDistance::encode(-10.0));
+        *voxel = SdfVoxel::new(SdfVoxelType(2), VoxelDistance::encode(-10.0));
     });
 
     initialize_camera(commands);
