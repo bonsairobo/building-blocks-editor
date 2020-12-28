@@ -29,7 +29,8 @@ pub fn terraformer_system(
     cursor_ray: Res<CursorRay>,
     keyboard: Res<Input<KeyCode>>,
 ) {
-    if let CurrentTool::Terraform = *current_tool {} else {
+    if let CurrentTool::Terraform = *current_tool {
+    } else {
         return;
     }
 
@@ -113,7 +114,7 @@ fn edit_sphere(
             let p_radius = (p - center).norm();
 
             // Change the SDF faster closer to the center.
-            const SDF_GROWTH_FACTOR: f32 = 10.0;
+            const SDF_GROWTH_FACTOR: f32 = 20.0;
             let sdf_delta = sign
                 * (SDF_GROWTH_FACTOR * (1.0 - p_radius / fradius))
                     .max(0.0)
