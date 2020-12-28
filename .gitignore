@@ -1,4 +1,7 @@
+.cargo
 /target
 Cargo.lock
+
 assets
+
 .vscode

@@ -96,7 +96,7 @@ pub fn drag_face_tool_system(
                             if new_axis_coord * normal.sign > previous_axis_coord * normal.sign {
                                 // We're dragging in the direction of the normal, so we should write
                                 // solid voxels.
-                                SdfVoxel::new(SdfVoxelType(1), VoxelDistance::min())
+                                SdfVoxel::new(SdfVoxelType(2), VoxelDistance::min())
                             } else {
                                 // We're dragging in the opposite direction of the normal, so we
                                 // should write empty voxels.

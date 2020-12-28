@@ -22,6 +22,10 @@ impl Ray3 {
     pub fn is_parallel_to(&self, other: &Self) -> bool {
         vectors_are_parallel(self.direction, other.direction)
     }
+
+    pub fn at_radius(&self, r: f32) -> Vec3 {
+        self.origin + r * self.direction.normalize()
+    }
 }
 
 pub fn vectors_are_parallel(v1: Vec3, v2: Vec3) -> bool {

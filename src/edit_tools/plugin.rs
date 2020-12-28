@@ -2,6 +2,8 @@ use super::{
     drag_face::{drag_face_tool_system, DragFaceState},
     edit_timeline::EditTimeline,
     selection::SelectionPlugin,
+    terraformer::{terraformer_system, Terraformer},
+    tool_switcher::tool_switcher_system,
     undo::undo_system,
     CurrentTool,
 };
@@ -15,6 +17,7 @@ impl EditToolsPlugin {
     fn initialize(commands: &mut Commands) {
         commands
             .insert_resource(EditTimeline::new())
+            .insert_resource(Terraformer::default())
             .insert_resource(CurrentTool::DragFace(DragFaceState::SelectionReady));
     }
 
@@ -27,6 +30,8 @@ impl EditToolsPlugin {
         SelectionPlugin::update_in_stage(stage);
         stage
             .add_system(undo_system.system())
+            .add_system(tool_switcher_system.system())
+            .add_system(terraformer_system.system())
             .add_system(drag_face_tool_system.system());
     }
 }

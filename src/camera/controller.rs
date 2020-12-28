@@ -50,7 +50,6 @@ pub fn mouse_camera_control_system(
     mut mouse_wheel_reader: Local<MouseWheelReader>,
     mouse_wheel: Res<Events<MouseWheel>>,
     mouse_buttons: Res<Input<MouseButton>>,
-    keys: Res<Input<KeyCode>>,
     cursor_position: Res<CursorPosition>,
     mut cameras: Query<(&mut MouseCameraController, &mut Transform)>,
 ) {
@@ -66,10 +65,6 @@ pub fn mouse_camera_control_system(
         smoother,
         enabled,
     } = &mut *camera;
-
-    if keys.just_pressed(KeyCode::C) {
-        *enabled = !*enabled;
-    }
 
     // We must be pressing the camera button for anything to take effect.
     if *enabled {

@@ -25,8 +25,7 @@ pub struct VoxelCursorState {
 
 #[derive(Default)]
 struct VoxelCursorButtonState {
-    /// If the mouse is pressed, this is the first voxel face that was pressed since the last
-    /// release.
+    /// If the mouse is pressed, this is the first voxel face that was pressed since the last release.
     pub press_start_face: Option<VoxelFace>,
 }
 
@@ -58,14 +57,12 @@ impl<'a> VoxelCursor<'a> {
         }
     }
 
-    /// If the mouse is pressed, this is the first voxel face that was pressed since the last
-    /// release.
+    /// If the mouse is pressed, this is the first voxel face that was pressed since the last release.
     pub fn press_start_face(&self, button: MouseButton) -> Option<VoxelFace> {
         self.state_for_button(button).press_start_face
     }
 
-    /// If the mouse was just released on the same voxel as `press_start`, then this is that voxel
-    /// face.
+    /// If the mouse was just released on the same voxel as `press_start`, then this is that voxel face.
     pub fn voxel_just_clicked(&self, button: MouseButton) -> Option<VoxelFace> {
         let just_released = self.voxel_just_released(button);
         if just_released == self.state_for_button(button).press_start_face {

@@ -3,6 +3,8 @@ mod edit_timeline;
 mod plugin;
 mod selection;
 mod snapshotting_editor;
+mod terraformer;
+mod tool_switcher;
 mod undo;
 
 pub use plugin::EditToolsPlugin;
@@ -12,10 +14,10 @@ use snapshotting_editor::SnapshottingVoxelEditor;
 
 pub enum CurrentTool {
     DragFace(DragFaceState),
+    Terraform,
     PaintMaterial, // TODO
     Tile,          // TODO: tile the current buffer by dragging; replaces DragFace
     Slope,         // TODO: select two edges to slope between
-    Brush,         // TODO: organic brushes
 }
 
 // TODO: 3D selection; like the drag face tool, but you drag to size the 3rd dimension of the
