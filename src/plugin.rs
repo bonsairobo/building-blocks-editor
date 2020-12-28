@@ -143,10 +143,19 @@ use crate::{SdfVoxel, SdfVoxelType, VoxelDistance};
 use building_blocks::prelude::*;
 
 fn initialize_editor(commands: &mut Commands, mut voxel_editor: VoxelEditor<SdfVoxel>) {
-    commands.spawn(LightBundle {
-        transform: Transform::from_translation(Vec3::new(0.100, 150.0, 100.0)),
-        ..Default::default()
-    });
+    for p in [
+        Vec3::new(-100.0, 100.0, -100.0),
+        Vec3::new(-100.0, 100.0, 100.0),
+        Vec3::new(100.0, 100.0, -100.0),
+        Vec3::new(100.0, 100.0, 100.0),
+    ]
+    .iter()
+    {
+        commands.spawn(LightBundle {
+            transform: Transform::from_translation(*p),
+            ..Default::default()
+        });
+    }
 
     // TODO: remove this once we can create voxels out of thin air
     println!("Initializing voxels");
