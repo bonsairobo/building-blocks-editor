@@ -18,7 +18,7 @@ impl VoxelPickingPlugin {
 
     pub fn update_in_stage(stage: &mut SystemStage) {
         stage
-            .add_system(voxel_cursor_impact_system.system())
-            .add_system(voxel_clicking_system.system());
+            .add_system(voxel_cursor_impact_system)
+            .add_system(voxel_clicking_system);
     }
 }

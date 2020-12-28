@@ -15,7 +15,7 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_system(mouse_camera_control_system.system())
+        app.add_system(mouse_camera_control_system)
             .add_plugin(CursorRayPlugin);
     }
 }

@@ -29,9 +29,9 @@ impl EditToolsPlugin {
     pub fn update_in_stage(stage: &mut SystemStage) {
         SelectionPlugin::update_in_stage(stage);
         stage
-            .add_system(undo_system.system())
-            .add_system(tool_switcher_system.system())
-            .add_system(terraformer_system.system())
-            .add_system(drag_face_tool_system.system());
+            .add_system(undo_system)
+            .add_system(tool_switcher_system)
+            .add_system(terraformer_system)
+            .add_system(drag_face_tool_system);
     }
 }

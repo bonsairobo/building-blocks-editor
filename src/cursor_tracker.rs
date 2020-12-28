@@ -9,7 +9,7 @@ pub struct CursorPositionPlugin;
 impl Plugin for CursorPositionPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_resource(CursorPosition::default())
-            .add_system(cursor_tracker_system.system());
+            .add_system(cursor_tracker_system);
     }
 }
 

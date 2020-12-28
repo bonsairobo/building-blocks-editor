@@ -53,20 +53,20 @@ mod stages {
 fn add_editor_schedule(app: &mut AppBuilder) {
     let mut editor_state_stage = StateStage::<EditorState>::default();
     editor_state_stage
-        .on_state_enter(EditorState::Loading, start_loading.system())
-        .on_state_update(EditorState::Loading, wait_for_assets_loaded.system())
-        .on_state_enter(EditorState::Editing, initialize_editor.system())
-        .on_state_enter(
-            EditorState::Editing,
-            MeshGeneratorPlugin::<SdfVoxel>::initialize,
-        )
-        .on_state_enter(EditorState::Editing, BVTPlugin::<SdfVoxel>::initialize)
-        .on_state_enter(EditorState::Editing, VoxelPickingPlugin::initialize)
+        // Load assets.
+        .on_state_enter(EditorState::Loading, start_loading)
+        .on_state_update(EditorState::Loading, wait_for_assets_loaded)
+        // Initialize editor systems.
         .enter_stage(EditorState::Editing, |stage: &mut SystemStage| {
             EditToolsPlugin::initialize_in_stage(stage);
 
             stage
+                .add_system(VoxelPickingPlugin::initialize)
+                .add_system(MeshGeneratorPlugin::<SdfVoxel>::initialize)
+                .add_system(BVTPlugin::<SdfVoxel>::initialize)
+                .add_system(initialize_editor)
         })
+        // Update editor systems.
         .update_stage(EditorState::Editing, |stage: &mut SystemStage| {
             MeshGeneratorPlugin::<SdfVoxel>::update_in_stage(stage);
             EditToolsPlugin::update_in_stage(stage);

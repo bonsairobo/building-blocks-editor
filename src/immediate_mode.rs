@@ -8,7 +8,7 @@ pub struct ImmediateModePlugin;
 
 impl Plugin for ImmediateModePlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_system_to_stage(stage::LAST, immediate_mode_cleanup_system.system());
+        app.add_system_to_stage(stage::LAST, immediate_mode_cleanup_system);
     }
 }
 
