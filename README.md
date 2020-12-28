@@ -23,6 +23,7 @@ Unreal Engine style mouse camera.
   - `SPACE`: create terrain
   - `BACKSPACE`: remove terrain
   - `1..4`: Select voxel type
+  - `UP`/`DOWN`: Increase/decrease brush radius
 - `D`: Enter face dragging mode
   - Click two face corners, then drag the highlighted region
 - `U`: Undo last edit
