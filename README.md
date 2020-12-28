@@ -22,5 +22,8 @@ Unreal Engine style mouse camera.
 - `T`: Enter terraforming mode
   - `SPACE`: create terrain
   - `BACKSPACE`: remove terrain
+  - `1..4`: Select voxel type
 - `D`: Enter face dragging mode
   - Click two face corners, then drag the highlighted region
+- `U`: Undo last edit
+- `R`: Redo last undone edit
