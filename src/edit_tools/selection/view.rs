@@ -108,7 +108,7 @@ fn create_single_quad_mesh_bundle(
         VertexAttributeValues::Float3(mesh.positions),
     );
     render_mesh.set_attribute("Vertex_Normal", VertexAttributeValues::Float3(mesh.normals));
-    // XXX: We have to provide UVs, even though we don't use them.
+    // HACK: We have to provide UVs, even though we don't use them.
     render_mesh.set_attribute(
         "Vertex_Uv",
         VertexAttributeValues::Float2(vec![[0.0; 2]; num_vertices]),

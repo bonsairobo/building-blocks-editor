@@ -2,6 +2,7 @@ use bevy_building_blocks::Voxel;
 
 use building_blocks::{mesh::SignedDistance, storage::IsEmpty};
 use serde::{Deserialize, Serialize};
+use smooth_voxel_renderer::{MaterialLayer, MaterialVoxel};
 
 /// The data actually stored in each point of the voxel map.
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -97,5 +98,11 @@ impl VoxelMaterial {
 impl IsEmpty for &SdfVoxelTypeInfo {
     fn is_empty(&self) -> bool {
         self.is_empty
+    }
+}
+
+impl MaterialVoxel for &SdfVoxelTypeInfo {
+    fn material(&self) -> MaterialLayer {
+        MaterialLayer(self.material.0)
     }
 }

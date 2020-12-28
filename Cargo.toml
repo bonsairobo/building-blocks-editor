@@ -40,6 +40,7 @@ features = ["ncollide"]
 [dependencies.smooth-voxel-renderer]
 git = "https://github.com/bonsairobo/smooth-voxel-renderer"
 branch = "main"
+# path = "../smooth-voxel-renderer"
 
 [features]
 default = []
