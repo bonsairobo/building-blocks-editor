@@ -63,7 +63,7 @@ pub fn terraformer_system(
     let edit_center = Point3f::from(edit_center).in_voxel();
 
     let mut lock_edit_dist_from_camera = false;
-    if keyboard.pressed(KeyCode::Space) {
+    if keyboard.pressed(KeyCode::Z) {
         lock_edit_dist_from_camera = true;
         edit_sphere(
             TerraformOperation::MakeSolid,
@@ -72,7 +72,7 @@ pub fn terraformer_system(
             terraformer.voxel_type,
             &mut voxel_editor,
         );
-    } else if keyboard.pressed(KeyCode::Back) {
+    } else if keyboard.pressed(KeyCode::X) {
         lock_edit_dist_from_camera = true;
         edit_sphere(
             TerraformOperation::RemoveSolid,
@@ -83,7 +83,7 @@ pub fn terraformer_system(
         );
     }
 
-    if keyboard.just_released(KeyCode::Space) || keyboard.just_released(KeyCode::Back) {
+    if keyboard.just_released(KeyCode::Z) || keyboard.just_released(KeyCode::X) {
         voxel_editor.finish_edit();
     }
 

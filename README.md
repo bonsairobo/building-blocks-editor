@@ -20,8 +20,8 @@ Unreal Engine style mouse camera.
 ### Editing Tools
 
 - `T`: Enter terraforming mode
-  - `SPACE`: create terrain
-  - `BACKSPACE`: remove terrain
+  - `Z`: create terrain
+  - `X`: remove terrain
   - `1..4`: Select voxel type
   - `UP`/`DOWN`: Increase/decrease brush radius
 - `D`: Enter face dragging mode
