@@ -49,11 +49,7 @@ impl VoxelDistance {
     const SDF_PRECISION: f32 = (Self::MAX_DISTANCE - Self::MIN_DISTANCE) / 256.0;
 
     pub fn encode(distance: f32) -> Self {
-        Self(
-            (distance / Self::SDF_PRECISION)
-                .min(std::i8::MAX as f32)
-                .max(std::i8::MIN as f32) as i8,
-        )
+        Self((distance / Self::SDF_PRECISION) as i8)
     }
 
     /// The inverse of `encode`.
@@ -71,8 +67,14 @@ impl VoxelDistance {
 }
 
 impl SignedDistance for SdfVoxel {
-    fn distance(&self) -> f32 {
-        self.distance.decode()
+    fn is_negative(self) -> bool {
+        self.distance.0 < 0
+    }
+}
+
+impl From<SdfVoxel> for f32 {
+    fn from(v: SdfVoxel) -> f32 {
+        v.distance.decode()
     }
 }
 
