@@ -1,5 +1,6 @@
 use approx::relative_eq;
 use bevy::math::prelude::*;
+use bevy::transform::components::Transform;
 
 pub use building_blocks::{
     core::Point3f,
@@ -7,6 +8,10 @@ pub use building_blocks::{
 };
 
 const PI: f32 = std::f32::consts::PI;
+
+pub fn offset_transform(offset: Point3f) -> Transform {
+    Transform::from_translation(offset.into())
+}
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Ray3 {
@@ -94,14 +99,14 @@ pub fn closest_points_on_two_lines(l1: &Ray3, l2: &Ray3) -> Option<(Vec3, Vec3)>
 /// about the y axis to get z'. Then the pitch is applied about some axis orthogonal to z' in the
 /// XZ plane to get v.
 pub fn yaw_and_pitch_from_vector(v: Vec3) -> (f32, f32) {
-    debug_assert_ne!(v, Vec3::zero());
+    debug_assert_ne!(v, Vec3::ZERO);
 
-    let y = Vec3::unit_y();
-    let z = Vec3::unit_z();
+    let y = Vec3::Y;
+    let z = Vec3::Z;
 
     let v_xz = Vec3::new(v.x, 0.0, v.z);
 
-    if v_xz == Vec3::zero() {
+    if v_xz == Vec3::ZERO {
         if v.dot(y) > 0.0 {
             return (0.0, PI / 2.0);
         } else {
@@ -123,8 +128,8 @@ pub fn yaw_and_pitch_from_vector(v: Vec3) -> (f32, f32) {
 }
 
 pub fn unit_vector_from_yaw_and_pitch(yaw: f32, pitch: f32) -> Vec3 {
-    let ray = Mat3::from_rotation_y(yaw) * Vec3::unit_z();
-    let pitch_axis = ray.cross(Vec3::unit_y());
+    let ray = Mat3::from_rotation_y(yaw) * Vec3::Z;
+    let pitch_axis = ray.cross(Vec3::Y);
 
     Mat3::from_axis_angle(pitch_axis, pitch) * ray
 }

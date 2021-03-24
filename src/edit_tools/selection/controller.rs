@@ -1,4 +1,4 @@
-use crate::voxel::{VoxelCursor, VoxelFace};
+use crate::picking::{VoxelCursor, VoxelFace};
 
 use bevy::{ecs::prelude::*, input::prelude::*};
 use building_blocks::core::{prelude::*, SignedAxis3};
@@ -21,7 +21,7 @@ pub enum SelectionState {
     Invisible,
 }
 
-pub fn initialize_selection_controller(commands: &mut Commands) {
+pub fn initialize_selection_controller(mut commands: Commands) {
     commands.insert_resource(SelectionState::SelectingFirstCorner);
 }
 

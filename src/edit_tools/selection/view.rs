@@ -1,6 +1,6 @@
 use super::SelectionState;
 
-use crate::{voxel::offset_transform, ImmediateModeTag, VoxelCursorRayImpact};
+use crate::{geometry::offset_transform, ImmediateModeTag, VoxelCursorRayImpact};
 
 use bevy::{
     asset::prelude::*,
@@ -15,7 +15,7 @@ use bevy::{
 use building_blocks::mesh::{OrientedCubeFace, PosNormMesh, UnorientedQuad};
 
 pub fn initialize_selection_view(
-    commands: &mut Commands,
+    mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let mut color = Color::YELLOW;
@@ -28,7 +28,7 @@ pub fn selection_view_system(
     selection_state: Res<SelectionState>,
     cursor_voxel: Res<VoxelCursorRayImpact>,
     material: Res<SelectionCursorMaterial>,
-    commands: &mut Commands,
+    mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
     let mut quad_face = None;
@@ -66,7 +66,13 @@ pub fn selection_view_system(
     }
 
     if let Some((quad, face)) = quad_face {
-        create_quad_selection_hint_entity(&quad, &face, material.0.clone(), commands, &mut *meshes);
+        create_quad_selection_hint_entity(
+            &quad,
+            &face,
+            material.0.clone(),
+            &mut commands,
+            &mut *meshes,
+        );
     }
 }
 
@@ -80,13 +86,12 @@ fn create_quad_selection_hint_entity(
     meshes: &mut Assets<Mesh>,
 ) -> Entity {
     commands
-        .spawn(create_single_quad_mesh_bundle(
+        .spawn_bundle(create_single_quad_mesh_bundle(
             &face, &quad, material, meshes,
         ))
-        .with(offset_transform(face.mesh_normal() * HOVER_DISTANCE))
-        .with(ImmediateModeTag)
-        .current_entity()
-        .unwrap()
+        .insert(offset_transform(face.mesh_normal() * HOVER_DISTANCE))
+        .insert(ImmediateModeTag)
+        .id()
 }
 
 const HOVER_DISTANCE: f32 = 0.2;

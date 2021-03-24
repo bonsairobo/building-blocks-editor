@@ -8,15 +8,15 @@ pub struct ImmediateModePlugin;
 
 impl Plugin for ImmediateModePlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_system_to_stage(stage::LAST, immediate_mode_cleanup_system);
+        app.add_system_to_stage(CoreStage::Last, immediate_mode_cleanup_system.system());
     }
 }
 
 pub fn immediate_mode_cleanup_system(
-    commands: &mut Commands,
+    mut commands: Commands,
     immediate_entities: Query<(Entity, &ImmediateModeTag)>,
 ) {
     for (entity, _) in immediate_entities.iter() {
-        commands.despawn(entity);
+        commands.entity(entity).despawn();
     }
 }

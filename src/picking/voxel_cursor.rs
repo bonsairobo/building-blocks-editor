@@ -1,26 +1,24 @@
-use super::VoxelCursorRayImpact;
-
-use crate::voxel::VoxelFace;
+use super::{VoxelCursorRayImpact, VoxelFace};
 
 use bevy::{
-    ecs::{prelude::*, SystemParam},
+    ecs::{prelude::*, system::SystemParam},
     input::prelude::*,
 };
 
-/// A set of convenience methods that combine state about the `VoxelCursorRayImpact` and
-/// `Input<MouseButton>`. Relies on some memory kept by the `voxel_clicking_system`.
+#[derive(Default)]
+pub struct VoxelCursorStates {
+    left_states: VoxelCursorButtonState,
+    middle_states: VoxelCursorButtonState,
+    right_states: VoxelCursorButtonState,
+}
+
+/// A set of convenience methods that combine state about the `VoxelCursorRayImpact` and `Input<MouseButton>`. Relies on some
+/// memory kept by the `voxel_clicking_system`.
 #[derive(SystemParam)]
 pub struct VoxelCursor<'a> {
     pub impact: Res<'a, VoxelCursorRayImpact>,
     pub mouse_input: Res<'a, Input<MouseButton>>,
-    state: Res<'a, VoxelCursorState>,
-}
-
-#[derive(Default)]
-pub struct VoxelCursorState {
-    left_states: VoxelCursorButtonState,
-    middle_states: VoxelCursorButtonState,
-    right_states: VoxelCursorButtonState,
+    state: Res<'a, VoxelCursorStates>,
 }
 
 #[derive(Default)]
@@ -91,7 +89,7 @@ impl<'a> VoxelCursor<'a> {
 pub fn voxel_clicking_system(
     voxel_cursor_impact: Res<VoxelCursorRayImpact>,
     mouse_input: Res<Input<MouseButton>>,
-    mut state: ResMut<VoxelCursorState>,
+    mut state: ResMut<VoxelCursorStates>,
 ) {
     for button in [MouseButton::Left, MouseButton::Middle, MouseButton::Right]
         .iter()

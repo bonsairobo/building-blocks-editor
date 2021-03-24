@@ -21,9 +21,9 @@ pub struct CursorRayPlugin;
 
 impl Plugin for CursorRayPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_resource(CursorRay::default())
-            .add_resource(CursorRayCalculator::default())
-            .add_system(cursor_ray_system);
+        app.insert_resource(CursorRay::default())
+            .insert_resource(CursorRayCalculator::default())
+            .add_system(cursor_ray_system.system());
     }
 }
 

@@ -1,13 +1,13 @@
 use super::{CurrentTool, SnapshottingVoxelEditor};
 
-use crate::{CursorRay, SdfVoxel, SdfVoxelType, VoxelCursor, EMPTY_SDF_VOXEL};
+use crate::{voxel::EMPTY_VOXEL_TYPE, CursorRay, VoxelCursor, VoxelType};
 
 use bevy::{ecs::prelude::*, input::prelude::*};
-use building_blocks::core::prelude::*;
+use building_blocks::{core::prelude::*, storage::Sd8};
 
 pub struct Terraformer {
     edit_radius: u32,
-    voxel_type: SdfVoxelType,
+    voxel_type: VoxelType,
     dist_from_camera: Option<f32>,
 }
 
@@ -15,7 +15,7 @@ impl Default for Terraformer {
     fn default() -> Self {
         Self {
             edit_radius: 10,
-            voxel_type: SdfVoxelType(1),
+            voxel_type: VoxelType(1),
             dist_from_camera: None,
         }
     }
@@ -42,13 +42,13 @@ pub fn terraformer_system(
     }
     // Adjust the voxel type to create.
     if keyboard.just_pressed(KeyCode::Key1) {
-        terraformer.voxel_type = SdfVoxelType(1);
+        terraformer.voxel_type = VoxelType(1);
     } else if keyboard.just_pressed(KeyCode::Key2) {
-        terraformer.voxel_type = SdfVoxelType(2);
+        terraformer.voxel_type = VoxelType(2);
     } else if keyboard.just_pressed(KeyCode::Key3) {
-        terraformer.voxel_type = SdfVoxelType(3);
+        terraformer.voxel_type = VoxelType(3);
     } else if keyboard.just_pressed(KeyCode::Key4) {
-        terraformer.voxel_type = SdfVoxelType(4);
+        terraformer.voxel_type = VoxelType(4);
     }
 
     let cursor_ray = if let CursorRay(Some(ray)) = *cursor_ray {
@@ -78,7 +78,7 @@ pub fn terraformer_system(
             TerraformOperation::RemoveSolid,
             edit_center,
             terraformer.edit_radius,
-            EMPTY_SDF_VOXEL.voxel_type,
+            EMPTY_VOXEL_TYPE,
             &mut voxel_editor,
         );
     }
@@ -100,7 +100,7 @@ fn edit_sphere(
     operation: TerraformOperation,
     center: Point3i,
     radius: u32,
-    voxel_type: SdfVoxelType,
+    voxel_type: VoxelType,
     voxel_editor: &mut SnapshottingVoxelEditor,
 ) {
     let fradius = radius as f32;
@@ -110,7 +110,7 @@ fn edit_sphere(
     };
     voxel_editor.edit_extent_and_touch_neighbors(
         centered_extent(center, radius),
-        |p: Point3i, v: &mut SdfVoxel| {
+        |p: Point3i, (v_type, v_dist): (&mut VoxelType, &mut Sd8)| {
             let p_radius = (p - center).norm();
 
             // Change the SDF faster closer to the center.
@@ -119,15 +119,15 @@ fn edit_sphere(
                 * (SDF_GROWTH_FACTOR * (1.0 - p_radius / fradius))
                     .max(0.0)
                     .round() as i16;
-            let new_dist = v.distance.0 as i16 + sdf_delta;
+            let new_dist = v_dist.0 as i16 + sdf_delta;
 
-            v.distance.0 = new_dist.max(std::i8::MIN as i16).min(std::i8::MAX as i16) as i8;
+            v_dist.0 = new_dist.max(std::i8::MIN as i16).min(std::i8::MAX as i16) as i8;
 
-            if sdf_delta < 0 && v.distance.0 < 0 {
+            if sdf_delta < 0 && v_dist.0 < 0 {
                 // Only set to the brush type if the voxel is solid.
-                v.voxel_type = voxel_type;
-            } else if sdf_delta > 0 && v.distance.0 >= 0 {
-                v.voxel_type = EMPTY_SDF_VOXEL.voxel_type;
+                *v_type = voxel_type;
+            } else if sdf_delta > 0 && v_dist.0 >= 0 {
+                *v_type = EMPTY_VOXEL_TYPE;
             }
         },
     );

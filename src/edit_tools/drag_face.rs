@@ -5,14 +5,15 @@ use super::{selection::SelectionState, CurrentTool, SnapshottingVoxelEditor};
 use crate::{
     camera::CursorRay,
     geometry::{closest_points_on_two_lines, Ray3},
-    voxel::VoxelCursor,
-    SdfVoxel, SdfVoxelType, VoxelDistance,
+    picking::VoxelCursor,
+    VoxelType,
 };
 
 use bevy::{ecs::prelude::*, input::prelude::*};
 use building_blocks::{
     core::{prelude::*, SignedAxis3},
     mesh::OrientedCubeFace,
+    storage::Sd8,
 };
 
 #[derive(Clone, Copy)]
@@ -52,7 +53,7 @@ pub fn drag_face_tool_system(
             };
 
             if let Some(voxel_face) = voxel_cursor.voxel_just_pressed(MouseButton::Left) {
-                if quad_extent.contains(&voxel_face.point) {
+                if quad_extent.contains(voxel_face.point) {
                     if let Some(mut controller) = mouse_camera_controllers.iter_mut().next() {
                         controller.disable();
                     }
@@ -88,28 +89,30 @@ pub fn drag_face_tool_system(
                     let new_drag_point = Point3f::from(p1).in_voxel();
 
                     if new_drag_point != previous_drag_point {
-                        let new_axis_coord = *new_drag_point.axis_component(normal.axis);
+                        let new_axis_coord = new_drag_point.axis_component(normal.axis);
                         *quad_extent.minimum.axis_component_mut(normal.axis) = new_axis_coord;
 
-                        let previous_axis_coord = *previous_drag_point.axis_component(normal.axis);
+                        let previous_axis_coord = previous_drag_point.axis_component(normal.axis);
                         let write_voxel =
                             if new_axis_coord * normal.sign > previous_axis_coord * normal.sign {
-                                // We're dragging in the direction of the normal, so we should write
-                                // solid voxels.
-                                SdfVoxel::new(SdfVoxelType(2), VoxelDistance::min())
+                                // We're dragging in the direction of the normal, so we should write solid voxels.
+                                (VoxelType(2), Sd8::NEG_ONE)
                             } else {
-                                // We're dragging in the opposite direction of the normal, so we
-                                // should write empty voxels.
-                                SdfVoxel::new(SdfVoxelType(0), VoxelDistance::max())
+                                // We're dragging in the opposite direction of the normal, so we should write empty voxels.
+                                (VoxelType(0), Sd8::NEG_ONE)
                             };
 
                         // Write voxels in the extent between the old and new quad.
-                        let fill_min = quad_extent.minimum.meet(&old_quad_extent.minimum);
-                        let fill_max = quad_extent.max().join(&old_quad_extent.max());
+                        let fill_min = quad_extent.minimum.meet(old_quad_extent.minimum);
+                        let fill_max = quad_extent.max().join(old_quad_extent.max());
                         let fill_extent = Extent3i::from_min_and_max(fill_min, fill_max);
-                        voxel_editor.edit_extent_and_touch_neighbors(fill_extent, |_p, voxel| {
-                            *voxel = write_voxel;
-                        });
+                        voxel_editor.edit_extent_and_touch_neighbors(
+                            fill_extent,
+                            |_p, (v_type, v_dist)| {
+                                *v_type = write_voxel.0;
+                                *v_dist = write_voxel.1;
+                            },
+                        );
 
                         *state = DragFaceState::DraggingFace {
                             quad_extent,

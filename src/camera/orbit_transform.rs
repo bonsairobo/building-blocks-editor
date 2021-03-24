@@ -32,7 +32,7 @@ pub fn p1_look_at_p2_transform(p1: Vec3, p2: Vec3) -> Transform {
     let look_vector = (p2 - p1).normalize();
     let look_at = p1 + look_vector;
 
-    Transform::from_translation(p1).looking_at(look_at, Vec3::unit_y())
+    Transform::from_translation(p1).looking_at(look_at, Vec3::Y)
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -87,7 +87,7 @@ impl PolarVector {
     }
 
     pub fn assert_not_looking_up(&self) {
-        let is_looking_up = relative_eq!(self.unit_vector().dot(Vec3::unit_y()), -1.0);
+        let is_looking_up = relative_eq!(self.unit_vector().dot(Vec3::Y), -1.0);
 
         assert!(
             !is_looking_up,

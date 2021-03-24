@@ -1,6 +1,8 @@
-use crate::{voxel::SdfVoxel, VOXEL_CHUNK_SHAPE};
+use crate::{
+    ambient_sdf_array, empty_sdf_chunk_hash_map, CompressibleSdfChunkMap, SdfChunkHashMap,
+    VoxelEditor, CHUNK_SHAPE,
+};
 
-use bevy_building_blocks::{default_array, empty_chunk_hash_map, VoxelEditor};
 use building_blocks::prelude::*;
 use std::collections::VecDeque;
 
@@ -18,7 +20,7 @@ impl EditTimeline {
             undo_queue: Default::default(),
             redo_queue: Default::default(),
             current_snapshot: Snapshot {
-                voxels: empty_chunk_hash_map(VOXEL_CHUNK_SHAPE),
+                voxels: empty_sdf_chunk_hash_map(CHUNK_SHAPE),
             },
         }
     }
@@ -33,19 +35,15 @@ impl EditTimeline {
         self.redo_queue.clear();
     }
 
-    pub fn undo(&mut self, editor: &mut VoxelEditor<SdfVoxel>) {
+    pub fn undo(&mut self, editor: &mut VoxelEditor) {
         reversible_restore_snapshot(&mut self.undo_queue, &mut self.redo_queue, editor)
     }
 
-    pub fn redo(&mut self, editor: &mut VoxelEditor<SdfVoxel>) {
+    pub fn redo(&mut self, editor: &mut VoxelEditor) {
         reversible_restore_snapshot(&mut self.redo_queue, &mut self.undo_queue, editor)
     }
 
-    pub fn add_extent_to_snapshot(
-        &mut self,
-        extent: Extent3i,
-        src_map: &CompressibleChunkMap3<SdfVoxel>,
-    ) {
+    pub fn add_extent_to_snapshot(&mut self, extent: Extent3i, src_map: &CompressibleSdfChunkMap) {
         for chunk_key in src_map.indexer.chunk_keys_for_extent(&extent) {
             self.current_snapshot
                 .voxels
@@ -53,11 +51,11 @@ impl EditTimeline {
                     src_map
                         .storage()
                         // This chunk will eventually get cached after being written by the editor.
-                        .copy_without_caching(&chunk_key)
-                        .map(|c| c.as_decompressed())
-                        .unwrap_or(Chunk3::with_array(default_array(
+                        .copy_without_caching(chunk_key)
+                        .map(|c| c.into_decompressed())
+                        .unwrap_or(ambient_sdf_array(
                             src_map.indexer.extent_for_chunk_at_key(chunk_key),
-                        )))
+                        ))
                 });
         }
     }
@@ -66,24 +64,24 @@ impl EditTimeline {
 fn reversible_restore_snapshot(
     do_queue: &mut VecDeque<Snapshot>,
     undo_queue: &mut VecDeque<Snapshot>,
-    editor: &mut VoxelEditor<SdfVoxel>,
+    editor: &mut VoxelEditor,
 ) {
     if let Some(snapshot) = do_queue.pop_back() {
         let indexer = snapshot.voxels.indexer;
         let storage = snapshot.voxels.take_storage();
 
-        let mut redo_snap_chunks = empty_chunk_hash_map(indexer.chunk_shape());
+        let mut redo_snap_chunks = empty_sdf_chunk_hash_map(indexer.chunk_shape());
         for (chunk_key, chunk) in storage.into_iter() {
-            editor.insert_chunk_and_touch_neighbors(chunk_key, chunk.array);
+            editor.insert_chunk_and_touch_neighbors(chunk_key, chunk);
             let old_chunk = editor
                 .map
                 .voxels
                 .storage()
-                .copy_without_caching(&chunk_key)
-                .map(|c| c.as_decompressed())
-                .unwrap_or(Chunk3::with_array(default_array(
+                .copy_without_caching(chunk_key)
+                .map(|c| c.into_decompressed())
+                .unwrap_or(ambient_sdf_array(
                     indexer.extent_for_chunk_at_key(chunk_key),
-                )));
+                ));
             redo_snap_chunks.write_chunk(chunk_key, old_chunk);
         }
         undo_queue.push_back(Snapshot {
@@ -93,13 +91,13 @@ fn reversible_restore_snapshot(
 }
 
 struct Snapshot {
-    voxels: ChunkHashMap3<SdfVoxel>,
+    voxels: SdfChunkHashMap,
 }
 
 impl Snapshot {
     fn new(chunk_shape: Point3i) -> Self {
         Self {
-            voxels: empty_chunk_hash_map(chunk_shape),
+            voxels: empty_sdf_chunk_hash_map(chunk_shape),
         }
     }
 }

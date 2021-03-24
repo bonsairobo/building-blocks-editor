@@ -15,7 +15,7 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_system(mouse_camera_control_system)
+        app.add_system(mouse_camera_control_system.system())
             .add_plugin(CursorRayPlugin);
     }
 }
@@ -26,14 +26,12 @@ pub fn create_camera_entity(
     eye: Vec3,
     target: Vec3,
 ) -> Entity {
-    let mut camera_components = Camera3dBundle::default();
-    camera_components.transform =
-        Transform::from_matrix(Mat4::face_toward(eye, target, Vec3::unit_y()));
+    let mut camera_components = PerspectiveCameraBundle::default();
+    camera_components.transform = Transform::from_translation(eye).looking_at(target, Vec3::Y);
 
     commands
-        .spawn(camera_components)
-        .with(CursorRayCameraTag)
-        .with(MouseCameraController::new(control_config, eye, target))
-        .current_entity()
-        .unwrap()
+        .spawn_bundle(camera_components)
+        .insert(CursorRayCameraTag)
+        .insert(MouseCameraController::new(control_config, eye, target))
+        .id()
 }

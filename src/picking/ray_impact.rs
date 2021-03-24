@@ -1,7 +1,7 @@
-use crate::{voxel::geometry::VoxelFace, CursorRay};
+use super::VoxelFace;
+use crate::{CursorRay, VoxelBVT};
 
 use bevy::ecs::prelude::*;
-use bevy_building_blocks::VoxelBVT;
 use building_blocks::{
     core::{prelude::*, SignedAxis3},
     search::{

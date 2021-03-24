@@ -47,8 +47,7 @@ pub struct CameraControlConfig {
 }
 
 pub fn mouse_camera_control_system(
-    mut mouse_wheel_reader: Local<MouseWheelReader>,
-    mouse_wheel: Res<Events<MouseWheel>>,
+    mut mouse_wheel_reader: EventReader<MouseWheel>,
     mouse_buttons: Res<Input<MouseButton>>,
     cursor_position: Res<CursorPosition>,
     mut cameras: Query<(&mut MouseCameraController, &mut Transform)>,
@@ -88,17 +87,17 @@ pub fn mouse_camera_control_system(
 
         polar_vector.assert_not_looking_up();
 
-        let yaw_rot = Quat::from_axis_angle(Vec3::unit_y(), polar_vector.get_yaw());
-        let rot_x = yaw_rot * Vec3::unit_x();
-        let rot_y = yaw_rot * Vec3::unit_y();
+        let yaw_rot = Quat::from_axis_angle(Vec3::Y, polar_vector.get_yaw());
+        let rot_x = yaw_rot * Vec3::X;
+        let rot_y = yaw_rot * Vec3::Y;
         if mouse_buttons.pressed(MouseButton::Left) && mouse_buttons.pressed(MouseButton::Right) {
             // Drag translates up/down (Y) and left/right (X).
             transform.pivot += control_config.mouse_translate_sensitivity
                 * (-cursor_delta.x * rot_x + cursor_delta.y * rot_y);
         }
         // On Mac, mouse wheel is the trackpad, treated the same as both mouse buttons down.
-        let mut trackpad_delta = Vec2::zero();
-        for event in mouse_wheel_reader.reader.iter(&*mouse_wheel) {
+        let mut trackpad_delta = Vec2::ZERO;
+        for event in mouse_wheel_reader.iter() {
             trackpad_delta.x += event.x;
             trackpad_delta.y += event.y;
         }
@@ -111,9 +110,4 @@ pub fn mouse_camera_control_system(
     *camera_transform = smoother
         .smooth_transform(control_config.smoothing_weight, transform)
         .pivot_look_at_orbit_transform();
-}
-
-#[derive(Default)]
-pub struct MouseWheelReader {
-    reader: EventReader<MouseWheel>,
 }

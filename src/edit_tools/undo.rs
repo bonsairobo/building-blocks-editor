@@ -1,13 +1,11 @@
 use super::edit_timeline::EditTimeline;
-
-use crate::voxel::SdfVoxel;
+use crate::VoxelEditor;
 
 use bevy::{ecs::prelude::*, input::prelude::*};
-use bevy_building_blocks::VoxelEditor;
 
 pub fn undo_system(
     mut edit_timeline: ResMut<EditTimeline>,
-    mut editor: VoxelEditor<SdfVoxel>,
+    mut editor: VoxelEditor,
     keys: Res<Input<KeyCode>>,
 ) {
     if keys.just_pressed(KeyCode::U) {
