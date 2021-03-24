@@ -99,7 +99,7 @@ pub fn drag_face_tool_system(
                                 (VoxelType(2), Sd8::NEG_ONE)
                             } else {
                                 // We're dragging in the opposite direction of the normal, so we should write empty voxels.
-                                (VoxelType(0), Sd8::NEG_ONE)
+                                (VoxelType(0), Sd8::ONE)
                             };
 
                         // Write voxels in the extent between the old and new quad.
