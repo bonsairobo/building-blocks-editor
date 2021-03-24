@@ -46,8 +46,7 @@ impl From<Ray3> for NCRay<f32> {
     }
 }
 
-/// Constructs a 3D ray starting from the window camera's near plane, pointing toward the screen
-/// space `point`.
+/// Constructs a 3D ray starting from the window camera's near plane, pointing toward the screen space `point`.
 pub fn ray_from_window_point(
     point: Vec2,
     screen_size: (f32, f32),
@@ -62,7 +61,7 @@ pub fn ray_from_window_point(
     let (_, _, camera_position) = camera_transform_matrix.to_scale_rotation_translation();
 
     let ndc_to_world = camera_transform_matrix * camera_projection_matrix.inverse();
-    let cursor_position = ndc_to_world.transform_point3(cursor_pos_ndc);
+    let cursor_position = ndc_to_world.project_point3(cursor_pos_ndc);
 
     let ray_direction = cursor_position - camera_position;
 
