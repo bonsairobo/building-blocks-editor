@@ -35,7 +35,7 @@ impl Plugin for EditorPlugin {
     }
 }
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum EditorState {
     Loading,
     Editing,
@@ -120,7 +120,7 @@ fn wait_for_assets_loaded(
         material.roughness = 0.8;
         material.reflectance = 0.2;
         commands.insert_resource(MeshMaterial(array_materials.add(material)));
-        state.set_next(EditorState::Editing).unwrap();
+        state.set(EditorState::Editing).unwrap();
     }
 }
 
@@ -146,8 +146,8 @@ fn initialize_editor(mut commands: Commands, mut voxel_editor: VoxelEditor) {
         commands.spawn_bundle(LightBundle {
             transform: Transform::from_translation(*p),
             light: Light {
-                intensity: 20000.0,
-                range: 200.0,
+                intensity: 40000.0,
+                range: 800.0,
                 ..Default::default()
             },
             ..Default::default()

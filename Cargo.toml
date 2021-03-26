@@ -20,7 +20,7 @@ thread_local = "1.0"
 # path = "../bevy"
 git = "https://github.com/bevyengine/bevy"
 # branch = "main"
-rev = "248ec1ed"
+rev = "7a511394"
 
 [dependencies.building-blocks]
 git = "https://github.com/bonsairobo/building-blocks"
