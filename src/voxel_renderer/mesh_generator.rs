@@ -1,7 +1,7 @@
 use crate::{
     ambient_sdf_array,
     voxel_renderer::{ArrayMaterial, MaterialLayer, MaterialVoxel, SmoothVoxelPbrBundle},
-    DirtyChunks, SdfVoxelMap, StatePlugin, ThreadLocalResource, ThreadLocalVoxelCache,
+    DirtyChunks, SdfVoxelMap, StatePlugin, ThreadLocalResource, ThreadLocalVoxelCache, VoxelType,
 };
 
 use building_blocks::{
@@ -111,14 +111,30 @@ fn generate_mesh_for_each_chunk(
                 let padded_chunk_extent = padded_surface_nets_chunk_extent(
                     &reader.indexer.extent_for_chunk_at_key(chunk_key),
                 );
-                let mut padded_chunk = ambient_sdf_array(padded_chunk_extent);
-                copy_extent(&padded_chunk_extent, &reader, &mut padded_chunk);
 
-                let sdf_map = TransformMap::new(&padded_chunk, |(_type, dist)| dist);
                 let mesh_tls = local_mesh_buffers.get();
-                let mut surface_nets_buffer = mesh_tls.get_or_default().borrow_mut();
+                let mut mesh_buffers = mesh_tls
+                    .get_or_create_with(|| {
+                        RefCell::new(MeshBuffers {
+                            padded_chunk: ambient_sdf_array(padded_chunk_extent),
+                            surface_nets_buffer: Default::default(),
+                        })
+                    })
+                    .borrow_mut();
+
+                let MeshBuffers {
+                    padded_chunk,
+                    surface_nets_buffer,
+                } = &mut *mesh_buffers;
+
+                padded_chunk.set_minimum(padded_chunk_extent.minimum);
+
+                copy_extent(&padded_chunk_extent, &reader, padded_chunk);
+
+                let padded_sdf_chunk = TransformMap::new(padded_chunk, |(_type, dist)| dist);
+
                 surface_nets(
-                    &sdf_map,
+                    &padded_sdf_chunk,
                     &padded_chunk_extent,
                     1.0,
                     &mut *surface_nets_buffer,
@@ -129,7 +145,7 @@ fn generate_mesh_for_each_chunk(
                 } else {
                     // Count materials adjacent to each vertex for texture blending.
                     let info_map =
-                        TransformMap::new(&padded_chunk, voxel_map.voxel_info_transform());
+                        TransformMap::new(padded_chunk, voxel_map.voxel_info_transform());
                     let material_counts =
                         count_adjacent_materials(&info_map, &surface_nets_buffer.surface_strides);
 
@@ -174,7 +190,12 @@ where
 
 // ThreadLocal doesn't let you get a mutable reference, so we need to use RefCell. We lock this down to only be used in this
 // module as a Local resource, so we know it's safe.
-type ThreadLocalMeshBuffers = ThreadLocalResource<RefCell<SurfaceNetsBuffer>>;
+type ThreadLocalMeshBuffers = ThreadLocalResource<RefCell<MeshBuffers>>;
+
+pub struct MeshBuffers {
+    surface_nets_buffer: SurfaceNetsBuffer,
+    padded_chunk: Array3x2<VoxelType, Sd8>,
+}
 
 fn create_voxel_mesh_bundle(
     mesh: PosNormMesh,
