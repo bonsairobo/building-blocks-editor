@@ -1,6 +1,6 @@
 use crate::{
     create_camera_entity, empty_compressible_sdf_chunk_map,
-    voxel_renderer::{ArrayMaterial, MeshGeneratorPlugin, MeshMaterial, SmoothVoxelPbrPlugin},
+    voxel_renderer::{ArrayMaterial, MeshGeneratorPlugin, MeshMaterial, VoxelRenderPlugin},
     BVTPlugin, CameraControlConfig, CameraPlugin, ChunkCacheConfig, CursorPositionPlugin,
     EditToolsPlugin, ImmediateModePlugin, MapIoPlugin, SdfVoxelMap, SdfVoxelPalette, VoxelEditor,
     VoxelMaterial, VoxelPickingPlugin, VoxelTypeInfo, CHUNK_SHAPE,
@@ -48,7 +48,7 @@ impl Plugin for EditorPlugin {
             .add_plugin(CursorPositionPlugin)
             .add_plugin(CameraPlugin)
             .add_plugin(ImmediateModePlugin)
-            .add_plugin(SmoothVoxelPbrPlugin)
+            .add_plugin(VoxelRenderPlugin)
             // This plugin should run systems in the LAST stage.
             .add_plugin(MapIoPlugin::new(CHUNK_SHAPE, ChunkCacheConfig::default()));
 

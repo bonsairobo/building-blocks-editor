@@ -16,9 +16,9 @@ use bevy::ecs::system::IntoSystem;
 use bevy::render::{prelude::Color, shader};
 
 #[derive(Default)]
-pub struct SmoothVoxelPbrPlugin;
+pub struct VoxelRenderPlugin;
 
-impl Plugin for SmoothVoxelPbrPlugin {
+impl Plugin for VoxelRenderPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.add_asset::<ArrayMaterial>().add_system_to_stage(
             CoreStage::PostUpdate,
