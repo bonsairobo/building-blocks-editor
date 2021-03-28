@@ -1,7 +1,7 @@
 use crate::{
     create_camera_entity, empty_compressible_sdf_chunk_map,
     voxel_renderer::{ArrayMaterial, MeshGeneratorPlugin, MeshMaterial, VoxelRenderPlugin},
-    BVTPlugin, CameraControlConfig, CameraPlugin, ChunkCacheConfig, CursorPositionPlugin,
+    BVTPlugin, CameraControlConfig, CameraPlugin, ChunkCacheConfig, Config, CursorPositionPlugin,
     EditToolsPlugin, ImmediateModePlugin, MapIoPlugin, SdfVoxelMap, SdfVoxelPalette, VoxelEditor,
     VoxelMaterial, VoxelPickingPlugin, VoxelTypeInfo, CHUNK_SHAPE,
 };
@@ -27,7 +27,15 @@ use bevy::{
 };
 
 /// The first-party plugins that we need from Bevy.
-pub struct BevyPlugins;
+pub struct BevyPlugins {
+    config: Config,
+}
+
+impl BevyPlugins {
+    pub fn new(config: Config) -> Self {
+        Self { config }
+    }
+}
 
 impl PluginGroup for BevyPlugins {
     fn build(&mut self, group: &mut PluginGroupBuilder) {
@@ -41,7 +49,9 @@ impl PluginGroup for BevyPlugins {
         group.add(WinitPlugin::default());
         group.add(WgpuPlugin::default());
 
-        group.add(WireframePlugin::default());
+        if self.config.wireframes {
+            group.add(WireframePlugin::default());
+        }
     }
 }
 
@@ -163,12 +173,9 @@ fn prepare_materials_texture(texture: &mut Texture) {
 use crate::VoxelType;
 use building_blocks::prelude::*;
 
-fn initialize_editor(
-    mut commands: Commands,
-    mut voxel_editor: VoxelEditor,
-    mut wireframe_config: ResMut<WireframeConfig>,
-) {
-    wireframe_config.global = true;
+fn initialize_editor(mut commands: Commands, mut voxel_editor: VoxelEditor) {
+    // Only used if the WireframePlugin is added.
+    commands.insert_resource(WireframeConfig { global: true });
 
     // TODO: remove this once we can create voxels out of thin air
     println!("Initializing voxels");

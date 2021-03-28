@@ -1,4 +1,4 @@
-use building_blocks_editor::{BevyPlugins, EditorPlugin};
+use building_blocks_editor::{BevyPlugins, Config, EditorPlugin};
 
 use bevy::{
     app::prelude::*,
@@ -7,7 +7,9 @@ use bevy::{
     window::WindowDescriptor,
 };
 
-fn main() {
+fn main() -> Result<(), ron::Error> {
+    let config = Config::read_file("config.ron")?;
+
     let mut window_desc = WindowDescriptor::default();
     window_desc.width = 1600.0;
     window_desc.height = 900.0;
@@ -25,8 +27,10 @@ fn main() {
             },
             ..Default::default()
         })
-        .add_plugins(BevyPlugins)
+        .add_plugins(BevyPlugins::new(config))
         // Editor stuff.
         .add_plugin(EditorPlugin)
         .run();
+
+    Ok(())
 }

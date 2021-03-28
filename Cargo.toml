@@ -12,6 +12,7 @@ lto = true
 
 [dependencies]
 approx = "0.4"
+ron = "0.6"
 serde = "1.0"
 thread_local = "1.0"
 

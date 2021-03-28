@@ -48,11 +48,11 @@ pub(crate) fn build_pbr_pipeline(shaders: &mut Assets<Shader>) -> PipelineDescri
         ..PipelineDescriptor::new(ShaderStages {
             vertex: shaders.add(Shader::from_glsl(
                 ShaderStage::Vertex,
-                include_str!("pbr.vert"),
+                include_str!("voxel_pipeline/pbr.vert"),
             )),
             fragment: Some(shaders.add(Shader::from_glsl(
                 ShaderStage::Fragment,
-                include_str!("pbr.frag"),
+                include_str!("voxel_pipeline/pbr.frag"),
             ))),
         })
     }
