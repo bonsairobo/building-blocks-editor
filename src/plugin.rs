@@ -60,7 +60,6 @@ pub struct EditorPlugin;
 impl Plugin for EditorPlugin {
     fn build(&self, app: &mut AppBuilder) {
         let app = app
-            .add_startup_system(create_lights.system())
             // Core stuff that always runs.
             .add_plugin(CursorPositionPlugin)
             .add_plugin(CameraPlugin)
@@ -185,10 +184,11 @@ fn initialize_editor(mut commands: Commands, mut voxel_editor: VoxelEditor) {
         *dist = Sd8::from(-10.0);
     });
 
+    create_lights(&mut commands);
     initialize_camera(&mut commands);
 }
 
-fn create_lights(mut commands: Commands) {
+fn create_lights(commands: &mut Commands) {
     for p in [
         Vec3::new(-100.0, 100.0, -100.0),
         Vec3::new(-100.0, 100.0, 100.0),
