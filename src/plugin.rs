@@ -14,12 +14,7 @@ use bevy::{
     input::InputPlugin,
     math::prelude::*,
     pbr::{Light, LightBundle, PbrPlugin},
-    render::{
-        prelude::*,
-        texture::AddressMode,
-        wireframe::{WireframeConfig, WireframePlugin},
-        RenderPlugin,
-    },
+    render::{prelude::*, texture::AddressMode, wireframe::WireframePlugin, RenderPlugin},
     transform::{components::Transform, TransformPlugin},
     wgpu::WgpuPlugin,
     window::WindowPlugin,
@@ -173,9 +168,6 @@ use crate::VoxelType;
 use building_blocks::prelude::*;
 
 fn initialize_editor(mut commands: Commands, mut voxel_editor: VoxelEditor) {
-    // Only used if the WireframePlugin is added.
-    commands.insert_resource(WireframeConfig { global: true });
-
     // TODO: remove this once we can create voxels out of thin air
     println!("Initializing voxels");
     let write_extent = Extent3i::from_min_and_shape(PointN([0, 0, 0]), PointN([64, 64, 64]));

@@ -2,7 +2,7 @@ use building_blocks_editor::{BevyPlugins, Config, EditorPlugin};
 
 use bevy::{
     app::prelude::*,
-    render::prelude::*,
+    render::{prelude::*, wireframe::WireframeConfig},
     wgpu::{WgpuFeature, WgpuFeatures, WgpuOptions},
     window::WindowDescriptor,
 };
@@ -27,6 +27,7 @@ fn main() -> Result<(), ron::Error> {
             },
             ..Default::default()
         })
+        .insert_resource(WireframeConfig { global: true })
         .add_plugins(BevyPlugins::new(config))
         // Editor stuff.
         .add_plugin(EditorPlugin)
