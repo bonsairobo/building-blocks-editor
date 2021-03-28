@@ -14,7 +14,12 @@ use bevy::{
     input::InputPlugin,
     math::prelude::*,
     pbr::{Light, LightBundle, PbrPlugin},
-    render::{prelude::*, texture::AddressMode, RenderPlugin},
+    render::{
+        prelude::*,
+        texture::AddressMode,
+        wireframe::{WireframeConfig, WireframePlugin},
+        RenderPlugin,
+    },
     transform::{components::Transform, TransformPlugin},
     wgpu::WgpuPlugin,
     window::WindowPlugin,
@@ -35,6 +40,8 @@ impl PluginGroup for BevyPlugins {
         group.add(PbrPlugin::default());
         group.add(WinitPlugin::default());
         group.add(WgpuPlugin::default());
+
+        group.add(WireframePlugin::default());
     }
 }
 
@@ -156,7 +163,13 @@ fn prepare_materials_texture(texture: &mut Texture) {
 use crate::VoxelType;
 use building_blocks::prelude::*;
 
-fn initialize_editor(mut commands: Commands, mut voxel_editor: VoxelEditor) {
+fn initialize_editor(
+    mut commands: Commands,
+    mut voxel_editor: VoxelEditor,
+    mut wireframe_config: ResMut<WireframeConfig>,
+) {
+    wireframe_config.global = true;
+
     // TODO: remove this once we can create voxels out of thin air
     println!("Initializing voxels");
     let write_extent = Extent3i::from_min_and_shape(PointN([0, 0, 0]), PointN([64, 64, 64]));

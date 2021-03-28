@@ -1,6 +1,11 @@
 use building_blocks_editor::{BevyPlugins, EditorPlugin};
 
-use bevy::{app::prelude::*, render::prelude::*, window::WindowDescriptor};
+use bevy::{
+    app::prelude::*,
+    render::prelude::*,
+    wgpu::{WgpuFeature, WgpuFeatures, WgpuOptions},
+    window::WindowDescriptor,
+};
 
 fn main() {
     let mut window_desc = WindowDescriptor::default();
@@ -13,6 +18,13 @@ fn main() {
         .insert_resource(window_desc)
         .insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.4)))
         .insert_resource(Msaa { samples: 4 })
+        .insert_resource(WgpuOptions {
+            features: WgpuFeatures {
+                // The Wireframe plugin requires NonFillPolygonMode feature
+                features: vec![WgpuFeature::NonFillPolygonMode],
+            },
+            ..Default::default()
+        })
         .add_plugins(BevyPlugins)
         // Editor stuff.
         .add_plugin(EditorPlugin)
