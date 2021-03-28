@@ -30,6 +30,3 @@ rev = "802af901"
 # version = "0.2.1"
 default-features = false
 features = ["glam", "lz4", "mesh", "nalgebra", "ncollide", "search"]
-
-[features]
-default = []

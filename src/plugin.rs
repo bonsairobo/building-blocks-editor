@@ -1,6 +1,6 @@
 use crate::{
     create_camera_entity, empty_compressible_sdf_chunk_map,
-    renderer::{ArrayMaterial, MeshGeneratorPlugin, MeshMaterial, SmoothVoxelPbrPlugin},
+    voxel_renderer::{ArrayMaterial, MeshGeneratorPlugin, MeshMaterial, SmoothVoxelPbrPlugin},
     BVTPlugin, CameraControlConfig, CameraPlugin, ChunkCacheConfig, CursorPositionPlugin,
     EditToolsPlugin, ImmediateModePlugin, MapIoPlugin, SdfVoxelMap, SdfVoxelPalette, VoxelEditor,
     VoxelMaterial, VoxelPickingPlugin, VoxelTypeInfo, CHUNK_SHAPE,

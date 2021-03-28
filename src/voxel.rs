@@ -1,4 +1,4 @@
-use crate::renderer::{MaterialLayer, MaterialVoxel};
+use crate::voxel_renderer::{MaterialLayer, MaterialVoxel};
 
 use building_blocks::storage::{IsEmpty, Sd8};
 use serde::{Deserialize, Serialize};

@@ -1,6 +1,6 @@
 use crate::{
     ambient_sdf_array,
-    renderer::{ArrayMaterial, MaterialLayer, MaterialVoxel, SmoothVoxelPbrBundle},
+    voxel_renderer::{ArrayMaterial, MaterialLayer, MaterialVoxel, SmoothVoxelPbrBundle},
     DirtyChunks, SdfVoxelMap, StatePlugin, ThreadLocalResource, ThreadLocalVoxelCache,
 };
 

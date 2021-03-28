@@ -1,4 +1,4 @@
-use crate::renderer::{material::ArrayMaterial, render_graph::PBR_PIPELINE_HANDLE};
+use crate::voxel_renderer::{material::ArrayMaterial, render_graph::PBR_PIPELINE_HANDLE};
 
 use bevy::asset::Handle;
 use bevy::ecs::bundle::Bundle;

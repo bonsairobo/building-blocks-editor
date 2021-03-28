@@ -1,13 +1,13 @@
-mod pbr_pipeline;
+mod voxel_pipeline;
 
 use bevy::ecs::world::World;
-pub use pbr_pipeline::*;
+pub use voxel_pipeline::*;
 
 pub mod node {
     pub const ARRAY_MATERIAL: &str = "array_material";
 }
 
-use crate::renderer::ArrayMaterial;
+use crate::voxel_renderer::ArrayMaterial;
 use bevy::asset::Assets;
 use bevy::render::{
     pipeline::PipelineDescriptor,
