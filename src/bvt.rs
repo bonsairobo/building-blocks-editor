@@ -1,6 +1,6 @@
 use crate::{DirtyChunks, EmptyChunks, SdfVoxelMap, StatePlugin, ThreadLocalVoxelCache};
 
-use building_blocks::{prelude::*, search::OctreeDBVT, storage::OctreeSet};
+use building_blocks::{prelude::*, search::OctreeDbvt, storage::OctreeSet};
 
 use bevy::{
     prelude::*,
@@ -27,8 +27,8 @@ impl StatePlugin for BVTPlugin {
     }
 }
 
-/// An `OctreeDBVT` that maps chunk keys to chunk `OctreeSet`s.
-pub type VoxelBVT = OctreeDBVT<Point3i>;
+/// An `OctreeDbvt` that maps chunk keys to chunk `OctreeSet`s.
+pub type VoxelBVT = OctreeDbvt<Point3i>;
 
 /// Generates new octrees for all edited chunks.
 fn octree_generator_system(

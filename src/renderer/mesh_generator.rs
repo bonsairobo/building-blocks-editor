@@ -153,7 +153,7 @@ where
 {
     let mut corner_offsets = [Stride(0); 8];
     voxels.strides_from_local_points(
-        &Local::localize_points(&Point3i::corner_offsets()),
+        &Local::localize_points_array(&Point3i::CUBE_CORNER_OFFSETS),
         &mut corner_offsets,
     );
     let mut material_counts = vec![[0; 4]; surface_strides.len()];
