@@ -1,6 +1,6 @@
-use building_blocks_editor::EditorPlugin;
+use building_blocks_editor::{BevyPlugins, EditorPlugin};
 
-use bevy::{app::prelude::*, render::prelude::*, window::WindowDescriptor, DefaultPlugins};
+use bevy::{app::prelude::*, render::prelude::*, window::WindowDescriptor};
 
 fn main() {
     let mut window_desc = WindowDescriptor::default();
@@ -13,7 +13,7 @@ fn main() {
         .insert_resource(window_desc)
         .insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.4)))
         .insert_resource(Msaa { samples: 4 })
-        .add_plugins(DefaultPlugins) // TODO: remove bevy::pbr
+        .add_plugins(BevyPlugins)
         // Editor stuff.
         .add_plugin(EditorPlugin)
         .run();

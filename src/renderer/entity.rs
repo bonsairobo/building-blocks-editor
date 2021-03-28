@@ -1,4 +1,4 @@
-use crate::renderer::{light::Light, material::ArrayMaterial, render_graph::PBR_PIPELINE_HANDLE};
+use crate::renderer::{material::ArrayMaterial, render_graph::PBR_PIPELINE_HANDLE};
 
 use bevy::asset::Handle;
 use bevy::ecs::bundle::Bundle;
@@ -39,12 +39,4 @@ impl Default for SmoothVoxelPbrBundle {
             global_transform: Default::default(),
         }
     }
-}
-
-/// A component bundle for "light" entities
-#[derive(Debug, Bundle, Default)]
-pub struct LightBundle {
-    pub light: Light,
-    pub transform: Transform,
-    pub global_transform: GlobalTransform,
 }

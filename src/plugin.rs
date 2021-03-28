@@ -1,27 +1,49 @@
 use crate::{
     create_camera_entity, empty_compressible_sdf_chunk_map,
-    renderer::{
-        ArrayMaterial, Light, LightBundle, MeshGeneratorPlugin, MeshMaterial, SmoothVoxelPbrPlugin,
-    },
+    renderer::{ArrayMaterial, MeshGeneratorPlugin, MeshMaterial, SmoothVoxelPbrPlugin},
     BVTPlugin, CameraControlConfig, CameraPlugin, ChunkCacheConfig, CursorPositionPlugin,
     EditToolsPlugin, ImmediateModePlugin, MapIoPlugin, SdfVoxelMap, SdfVoxelPalette, VoxelEditor,
     VoxelMaterial, VoxelPickingPlugin, VoxelTypeInfo, CHUNK_SHAPE,
 };
 
 use bevy::{
-    app::prelude::*,
-    asset::prelude::*,
+    app::{prelude::*, PluginGroupBuilder},
+    asset::{prelude::*, AssetPlugin},
+    core::CorePlugin,
     ecs::prelude::*,
+    input::InputPlugin,
     math::prelude::*,
-    render::{prelude::*, texture::AddressMode},
-    transform::components::Transform,
+    pbr::{Light, LightBundle, PbrPlugin},
+    render::{prelude::*, texture::AddressMode, RenderPlugin},
+    transform::{components::Transform, TransformPlugin},
+    wgpu::WgpuPlugin,
+    window::WindowPlugin,
+    winit::WinitPlugin,
 };
+
+/// The first-party plugins that we need from Bevy.
+pub struct BevyPlugins;
+
+impl PluginGroup for BevyPlugins {
+    fn build(&mut self, group: &mut PluginGroupBuilder) {
+        group.add(CorePlugin::default());
+        group.add(TransformPlugin::default());
+        group.add(InputPlugin::default());
+        group.add(WindowPlugin::default());
+        group.add(AssetPlugin::default());
+        group.add(RenderPlugin::default());
+        group.add(PbrPlugin::default());
+        group.add(WinitPlugin::default());
+        group.add(WgpuPlugin::default());
+    }
+}
 
 pub struct EditorPlugin;
 
 impl Plugin for EditorPlugin {
     fn build(&self, app: &mut AppBuilder) {
         let app = app
+            .add_startup_system(create_lights.system())
             // Core stuff that always runs.
             .add_plugin(CursorPositionPlugin)
             .add_plugin(CameraPlugin)
@@ -135,6 +157,18 @@ use crate::VoxelType;
 use building_blocks::prelude::*;
 
 fn initialize_editor(mut commands: Commands, mut voxel_editor: VoxelEditor) {
+    // TODO: remove this once we can create voxels out of thin air
+    println!("Initializing voxels");
+    let write_extent = Extent3i::from_min_and_shape(PointN([0, 0, 0]), PointN([64, 64, 64]));
+    voxel_editor.edit_extent_and_touch_neighbors(write_extent, |_p, (voxel_type, dist)| {
+        *voxel_type = VoxelType(2);
+        *dist = Sd8::from(-10.0);
+    });
+
+    initialize_camera(&mut commands);
+}
+
+fn create_lights(mut commands: Commands) {
     for p in [
         Vec3::new(-100.0, 100.0, -100.0),
         Vec3::new(-100.0, 100.0, 100.0),
@@ -153,16 +187,6 @@ fn initialize_editor(mut commands: Commands, mut voxel_editor: VoxelEditor) {
             ..Default::default()
         });
     }
-
-    // TODO: remove this once we can create voxels out of thin air
-    println!("Initializing voxels");
-    let write_extent = Extent3i::from_min_and_shape(PointN([0, 0, 0]), PointN([64, 64, 64]));
-    voxel_editor.edit_extent_and_touch_neighbors(write_extent, |_p, (voxel_type, dist)| {
-        *voxel_type = VoxelType(2);
-        *dist = Sd8::from(-10.0);
-    });
-
-    initialize_camera(&mut commands);
 }
 
 fn initialize_camera(commands: &mut Commands) {
