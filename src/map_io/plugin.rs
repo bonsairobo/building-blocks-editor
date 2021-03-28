@@ -52,9 +52,26 @@ impl Plugin for MapIoPlugin {
             .insert_resource(ThreadLocalVoxelCache::new())
             // Ordering the cache flusher and double buffering is important, because we don't want to overwrite edits with
             // locally cached chunks. Similarly, empty chunks should be removed before new edits are merged in.
-            .add_system_to_stage(CoreStage::Last, chunk_cache_flusher_system.system())
-            .add_system_to_stage(CoreStage::Last, empty_chunk_remover_system.system())
+            .add_system_to_stage(
+                CoreStage::Last,
+                chunk_cache_flusher_system.system().label(Label::FlushCache),
+            )
+            .add_system_to_stage(
+                CoreStage::Last,
+                empty_chunk_remover_system
+                    .system()
+                    .before(Label::MergeEdits),
+            )
             .add_system_to_stage(CoreStage::Last, double_buffering_system.system())
-            .add_system_to_stage(CoreStage::Last, chunk_compressor_system.system());
+            .add_system_to_stage(
+                CoreStage::Last,
+                chunk_compressor_system.system().label(Label::MergeEdits),
+            );
     }
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemLabel)]
+enum Label {
+    FlushCache,
+    MergeEdits,
 }
