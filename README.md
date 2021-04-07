@@ -7,6 +7,10 @@ Voxel map editor using [building-blocks](https://github.com/bonsairobo/building-
 This is very much a work in progress and very experimental. But we hope that eventually this will actually be
 useful for making games.
 
+## Assets
+
+To get our example assets, install [Git LFS](https://git-lfs.github.com/) before cloning.
+
 ## Controls
 
 ### Camera
