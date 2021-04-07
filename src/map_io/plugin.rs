@@ -54,25 +54,16 @@ impl Plugin for MapIoPlugin {
             // locally cached chunks. Similarly, empty chunks should be removed before new edits are merged in.
             .add_system_to_stage(
                 CoreStage::Last,
-                chunk_cache_flusher_system
-                    .system()
-                    .before(Label::MergeEdits),
+                chunk_cache_flusher_system.system().before("merge_edits"),
             )
             .add_system_to_stage(
                 CoreStage::Last,
-                empty_chunk_remover_system
-                    .system()
-                    .before(Label::MergeEdits),
+                empty_chunk_remover_system.system().before("merge_edits"),
             )
             .add_system_to_stage(
                 CoreStage::Last,
-                double_buffering_system.system().label(Label::MergeEdits),
+                double_buffering_system.system().label("merge_edits"),
             )
             .add_system_to_stage(CoreStage::Last, chunk_compressor_system.system());
     }
-}
-
-#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemLabel)]
-enum Label {
-    MergeEdits,
 }
