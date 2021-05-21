@@ -103,7 +103,7 @@ fn create_single_quad_mesh_bundle(
     meshes: &mut Assets<Mesh>,
 ) -> PbrBundle {
     let mut mesh = PosNormMesh::default();
-    face.add_quad_to_pos_norm_mesh(quad, &mut mesh);
+    face.add_quad_to_pos_norm_mesh(quad, 1.0, &mut mesh);
 
     let num_vertices = mesh.positions.len();
 

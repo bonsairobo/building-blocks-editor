@@ -12,7 +12,7 @@ impl Plugin for ImmediateModePlugin {
     }
 }
 
-pub fn immediate_mode_cleanup_system(
+fn immediate_mode_cleanup_system(
     mut commands: Commands,
     immediate_entities: Query<(Entity, &ImmediateModeTag)>,
 ) {
