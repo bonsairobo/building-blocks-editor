@@ -137,7 +137,7 @@ fn start_loading(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
         });
     commands.insert_resource(LoadingTexture(
-        asset_server.load("grass_rock_snow_dirt/albedo.png"),
+        asset_server.load("grass_rock_snow_dirt/base_color.png"),
     ));
 }
 
