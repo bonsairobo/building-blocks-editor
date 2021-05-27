@@ -1,8 +1,8 @@
-use super::{CurrentTool, SnapshottingVoxelEditor};
+use super::{CurrentTool, SnapshottingVoxelEditor, events::TerraformerEvents};
 
 use crate::{voxel::EMPTY_VOXEL_TYPE, CursorRay, VoxelCursor, VoxelType};
 
-use bevy::{ecs::prelude::*, input::prelude::*};
+use bevy::{ecs::prelude::*, input::{mouse::MouseWheel, prelude::*}, prelude::*};
 use building_blocks::{core::prelude::*, storage::Sd8};
 
 pub struct Terraformer {
@@ -21,6 +21,22 @@ impl Default for Terraformer {
     }
 }
 
+pub fn terraformer_default_input_map(
+    mut events: EventWriter<TerraformerEvents>,
+    keyboard: Res<Input<KeyCode>>,
+) {
+    // Adjust the edit radius.
+    if keyboard.just_pressed(KeyCode::Up) {
+        events.send(TerraformerEvents::ChangeEditRadius(
+            1,
+        ))
+    } else if keyboard.just_pressed(KeyCode::Down) {
+        events.send(TerraformerEvents::ChangeEditRadius(
+            -1,
+        ))
+    } 
+}
+
 pub fn terraformer_system(
     current_tool: Res<CurrentTool>,
     mut terraformer: ResMut<Terraformer>,
@@ -28,18 +44,19 @@ pub fn terraformer_system(
     voxel_cursor: VoxelCursor,
     cursor_ray: Res<CursorRay>,
     keyboard: Res<Input<KeyCode>>,
+    mut events: EventReader<TerraformerEvents>,
 ) {
     if let CurrentTool::Terraform = *current_tool {
     } else {
         return;
     }
 
-    // Adjust the edit radius.
-    if keyboard.just_pressed(KeyCode::Up) {
-        terraformer.edit_radius += 1;
-    } else if keyboard.just_pressed(KeyCode::Down) {
-        terraformer.edit_radius = (terraformer.edit_radius - 1).max(1);
-    }
+    events.iter().for_each(|event| {
+        if let TerraformerEvents::ChangeEditRadius(delta) = event {
+            terraformer.edit_radius = ((*delta as i32 + terraformer.edit_radius as i32) as u32).max(1);
+        }
+    });
+
     // Adjust the voxel type to create.
     if keyboard.just_pressed(KeyCode::Key1) {
         terraformer.voxel_type = VoxelType(1);

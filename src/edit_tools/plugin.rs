@@ -2,7 +2,7 @@ use super::{
     drag_face::{drag_face_tool_system, DragFaceState},
     edit_timeline::EditTimeline,
     selection::SelectionPlugin,
-    terraformer::{terraformer_system, Terraformer},
+    terraformer::{terraformer_system, terraformer_default_input_map, Terraformer},
     tool_switcher::tool_switcher_system,
     undo::undo_system,
     CurrentTool,
@@ -32,6 +32,7 @@ impl StatePlugin for EditToolsPlugin {
             .with_system(undo_system.system())
             .with_system(tool_switcher_system.system())
             .with_system(terraformer_system.system())
+            .with_system(terraformer_default_input_map.system())
             .with_system(drag_face_tool_system.system())
     }
 }
