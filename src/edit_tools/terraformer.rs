@@ -34,7 +34,20 @@ pub fn terraformer_default_input_map(
         events.send(TerraformerEvents::ChangeEditRadius(
             -1,
         ))
-    } 
+    }
+
+    // Adjust the voxel type to create.
+    if keyboard.just_pressed(KeyCode::Key1) {
+        events.send(TerraformerEvents::ChangeVoxelType(1));
+    } else if keyboard.just_pressed(KeyCode::Key2) {
+        events.send(TerraformerEvents::ChangeVoxelType(2));
+    } else if keyboard.just_pressed(KeyCode::Key3) {
+        events.send(TerraformerEvents::ChangeVoxelType(3));
+    } else if keyboard.just_pressed(KeyCode::Key4) {
+        events.send(TerraformerEvents::ChangeVoxelType(4));
+    }
+
+    
 }
 
 pub fn terraformer_system(
@@ -55,18 +68,12 @@ pub fn terraformer_system(
         if let TerraformerEvents::ChangeEditRadius(delta) = event {
             terraformer.edit_radius = ((*delta as i32 + terraformer.edit_radius as i32) as u32).max(1);
         }
-    });
 
-    // Adjust the voxel type to create.
-    if keyboard.just_pressed(KeyCode::Key1) {
-        terraformer.voxel_type = VoxelType(1);
-    } else if keyboard.just_pressed(KeyCode::Key2) {
-        terraformer.voxel_type = VoxelType(2);
-    } else if keyboard.just_pressed(KeyCode::Key3) {
-        terraformer.voxel_type = VoxelType(3);
-    } else if keyboard.just_pressed(KeyCode::Key4) {
-        terraformer.voxel_type = VoxelType(4);
-    }
+        // Adjust the voxel type to create.
+        if let TerraformerEvents::ChangeVoxelType(voxel_type) = event {
+            terraformer.voxel_type = VoxelType(*voxel_type);
+        }
+    });
 
     let cursor_ray = if let CursorRay(Some(ray)) = *cursor_ray {
         ray
