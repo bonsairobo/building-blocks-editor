@@ -1,8 +1,8 @@
-use super::{CurrentTool, SnapshottingVoxelEditor, events::TerraformerEvents};
+use super::{events::TerraformerEvents, CurrentTool, SnapshottingVoxelEditor};
 
 use crate::{voxel::EMPTY_VOXEL_TYPE, CursorRay, VoxelCursor, VoxelType};
 
-use bevy::{ecs::prelude::*, input::{mouse::MouseWheel, prelude::*}, prelude::*};
+use bevy::{ecs::prelude::*, input::prelude::*, prelude::*};
 use building_blocks::{core::prelude::*, storage::Sd8};
 
 pub struct Terraformer {
@@ -27,13 +27,9 @@ pub fn terraformer_default_input_map(
 ) {
     // Adjust the edit radius.
     if keyboard.just_pressed(KeyCode::Up) {
-        events.send(TerraformerEvents::ChangeEditRadius(
-            1,
-        ))
+        events.send(TerraformerEvents::ChangeEditRadius(1))
     } else if keyboard.just_pressed(KeyCode::Down) {
-        events.send(TerraformerEvents::ChangeEditRadius(
-            -1,
-        ))
+        events.send(TerraformerEvents::ChangeEditRadius(-1))
     }
 
     // Adjust the voxel type to create.
@@ -47,7 +43,15 @@ pub fn terraformer_default_input_map(
         events.send(TerraformerEvents::ChangeVoxelType(4));
     }
 
-    
+    if keyboard.pressed(KeyCode::Z) {
+        events.send(TerraformerEvents::MakeSolid);
+    } else if keyboard.pressed(KeyCode::X) {
+        events.send(TerraformerEvents::RemoveSolid);
+    }
+
+    if keyboard.just_released(KeyCode::Z) || keyboard.just_released(KeyCode::X) {
+        events.send(TerraformerEvents::FinishEdit);
+    }
 }
 
 pub fn terraformer_system(
@@ -56,24 +60,12 @@ pub fn terraformer_system(
     mut voxel_editor: SnapshottingVoxelEditor,
     voxel_cursor: VoxelCursor,
     cursor_ray: Res<CursorRay>,
-    keyboard: Res<Input<KeyCode>>,
     mut events: EventReader<TerraformerEvents>,
 ) {
     if let CurrentTool::Terraform = *current_tool {
     } else {
         return;
     }
-
-    events.iter().for_each(|event| {
-        if let TerraformerEvents::ChangeEditRadius(delta) = event {
-            terraformer.edit_radius = ((*delta as i32 + terraformer.edit_radius as i32) as u32).max(1);
-        }
-
-        // Adjust the voxel type to create.
-        if let TerraformerEvents::ChangeVoxelType(voxel_type) = event {
-            terraformer.voxel_type = VoxelType(*voxel_type);
-        }
-    });
 
     let cursor_ray = if let CursorRay(Some(ray)) = *cursor_ray {
         ray
@@ -87,28 +79,39 @@ pub fn terraformer_system(
     let edit_center = Point3f::from(edit_center).in_voxel();
 
     let mut lock_edit_dist_from_camera = false;
-    if keyboard.pressed(KeyCode::Z) {
-        lock_edit_dist_from_camera = true;
-        edit_sphere(
-            TerraformOperation::MakeSolid,
-            edit_center,
-            terraformer.edit_radius,
-            terraformer.voxel_type,
-            &mut voxel_editor,
-        );
-    } else if keyboard.pressed(KeyCode::X) {
-        lock_edit_dist_from_camera = true;
-        edit_sphere(
-            TerraformOperation::RemoveSolid,
-            edit_center,
-            terraformer.edit_radius,
-            EMPTY_VOXEL_TYPE,
-            &mut voxel_editor,
-        );
-    }
-
-    if keyboard.just_released(KeyCode::Z) || keyboard.just_released(KeyCode::X) {
-        voxel_editor.finish_edit();
+    for event in events.iter() {
+        match event {
+            TerraformerEvents::MakeSolid => {
+                lock_edit_dist_from_camera = true;
+                edit_sphere(
+                    TerraformOperation::MakeSolid,
+                    edit_center,
+                    terraformer.edit_radius,
+                    terraformer.voxel_type,
+                    &mut voxel_editor,
+                );
+            }
+            TerraformerEvents::RemoveSolid => {
+                lock_edit_dist_from_camera = true;
+                edit_sphere(
+                    TerraformOperation::RemoveSolid,
+                    edit_center,
+                    terraformer.edit_radius,
+                    EMPTY_VOXEL_TYPE,
+                    &mut voxel_editor,
+                );
+            }
+            TerraformerEvents::FinishEdit => {
+                voxel_editor.finish_edit();
+            }
+            TerraformerEvents::ChangeEditRadius(delta) => {
+                terraformer.edit_radius =
+                    ((*delta as i32 + terraformer.edit_radius as i32) as u32).max(1);
+            }
+            TerraformerEvents::ChangeVoxelType(voxel_type) => {
+                terraformer.voxel_type = VoxelType(*voxel_type);
+            }
+        }
     }
 
     if !lock_edit_dist_from_camera {

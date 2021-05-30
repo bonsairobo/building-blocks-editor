@@ -62,7 +62,7 @@ impl Plugin for EditorPlugin {
             .add_plugin(VoxelRenderPlugin)
             // This plugin should run systems in the LAST stage.
             .add_plugin(MapIoPlugin::new(CHUNK_SHAPE, ChunkCacheConfig::default()));
-        
+
         // Editor events
         add_editor_events(app);
 
