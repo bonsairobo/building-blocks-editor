@@ -95,6 +95,7 @@ pub fn mouse_camera_control_system(
             transform.pivot += control_config.mouse_translate_sensitivity
                 * (-cursor_delta.x * rot_x + cursor_delta.y * rot_y);
         }
+
         // On Mac, mouse wheel is the trackpad, treated the same as both mouse buttons down.
         let mut trackpad_delta = Vec2::ZERO;
         for event in mouse_wheel_reader.iter() {

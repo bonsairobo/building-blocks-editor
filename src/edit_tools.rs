@@ -20,6 +20,16 @@ pub enum CurrentTool {
     Slope,         // TODO: select two edges to slope between
 }
 
+pub mod events {
+    pub enum TerraformerEvents {
+        ChangeEditRadius(i8),
+        ChangeVoxelType(u8),
+        MakeSolid,
+        RemoveSolid,
+        FinishEdit,
+    }
+}
+
 // TODO: 3D selection; like the drag face tool, but you drag to size the 3rd dimension of the
 // selection. Move the selection by dragging a face. Allow visibility masking so you can only see
 // the voxels in the selection.

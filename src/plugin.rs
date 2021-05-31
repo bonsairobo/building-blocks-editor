@@ -1,5 +1,5 @@
 use crate::{
-    create_camera_entity, empty_compressible_sdf_chunk_map,
+    create_camera_entity, edit_tools, empty_compressible_sdf_chunk_map,
     voxel_renderer::{ArrayMaterial, MeshGeneratorPlugin, MeshMaterial, VoxelRenderPlugin},
     BVTPlugin, CameraControlConfig, CameraPlugin, ChunkCacheConfig, Config, CursorPositionPlugin,
     EditToolsPlugin, ImmediateModePlugin, MapIoPlugin, SdfVoxelMap, SdfVoxelPalette, VoxelEditor,
@@ -63,6 +63,9 @@ impl Plugin for EditorPlugin {
             // This plugin should run systems in the LAST stage.
             .add_plugin(MapIoPlugin::new(CHUNK_SHAPE, ChunkCacheConfig::default()));
 
+        // Editor events
+        add_editor_events(app);
+
         // Editor scheduling.
         add_editor_schedule(app);
     }
@@ -72,6 +75,10 @@ impl Plugin for EditorPlugin {
 enum EditorState {
     Loading,
     Editing,
+}
+
+fn add_editor_events(app: &mut AppBuilder) {
+    app.add_event::<edit_tools::events::TerraformerEvents>();
 }
 
 fn add_editor_schedule(app: &mut AppBuilder) {
