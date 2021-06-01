@@ -78,24 +78,18 @@ pub fn selection_control_system(
                 if let SelectionState::SelectingSecondCorner { first_corner, .. } = *selection_state
                 {
                     if selection_corners_are_compatible(&first_corner, &hover_face) {
-                        let new_state = SelectionState::SelectingSecondCorner {
+                        *selection_state = SelectionState::SelectingSecondCorner {
                             first_corner,
                             valid_hover: Some(*hover_face),
                         };
-                        *selection_state = new_state;
                     }
                 }
             }
             SelectionEvents::SelectSecondCorner(hover_face) => {
-                if let SelectionState::SelectingSecondCorner {
-                    first_corner,
-                    valid_hover,
-                } = &mut *selection_state
+                if let SelectionState::SelectingSecondCorner { first_corner, .. } =
+                    &mut *selection_state
                 {
-                    *valid_hover = None;
-                    // let mut valid_selection = false;
                     if selection_corners_are_compatible(first_corner, &hover_face) {
-                        // valid_selection = true;
                         *selection_state = SelectionState::SelectionReady {
                             quad_extent: Extent3i::from_corners(
                                 first_corner.point,
