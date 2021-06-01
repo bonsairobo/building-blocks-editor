@@ -46,6 +46,11 @@ impl<'a> VoxelCursor<'a> {
         }
     }
 
+    /// Was a voxel face just pressed?
+    pub fn was_voxel_just_pressed(&self, button: MouseButton) -> bool {
+        self.voxel_just_pressed(button).is_some()
+    }
+
     /// If the mouse was just released, this is the voxel where it was released.
     pub fn voxel_just_released(&self, button: MouseButton) -> Option<VoxelFace> {
         if self.mouse_input.just_released(button) {

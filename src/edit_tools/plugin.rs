@@ -1,5 +1,7 @@
 use super::{
-    drag_face::{drag_face_tool_system, DragFaceState},
+    drag_face::{
+        drag_face_default_input_map, drag_face_tool_system, DragFaceEvents, DragFaceState,
+    },
     edit_timeline::EditTimeline,
     selection::SelectionPlugin,
     terraformer::{
@@ -37,11 +39,13 @@ impl StatePlugin for EditToolsPlugin {
             .with_system(terraformer_system.system())
             .with_system(terraformer_default_input_map.system())
             .with_system(drag_face_tool_system.system())
+            .with_system(drag_face_default_input_map.system())
     }
 }
 
 impl EventPlugin for EditToolsPlugin {
     fn register_events(app: &mut AppBuilder) {
         app.add_event::<TerraformerEvents>();
+        app.add_event::<DragFaceEvents>();
     }
 }
