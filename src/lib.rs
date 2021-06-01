@@ -28,7 +28,7 @@ pub use map_io::{
     ChunkCacheConfig, DirtyChunks, EmptyChunks, MapIoPlugin, ThreadLocalVoxelCache, VoxelEditor,
 };
 pub use picking::{VoxelCursor, VoxelCursorRayImpact, VoxelPickingPlugin};
-pub use plugin::{BevyPlugins, EditorPlugin, EventPlugin, StatePlugin};
+pub use plugin::{BevyPlugins, EditorPlugin, StatePlugin};
 pub use thread_local_resource::{ThreadLocalResource, ThreadLocalResourceHandle};
 pub use voxel::{
     VoxelMaterial, VoxelType, VoxelTypeInfo, EMPTY_SDF_VOXEL, EMPTY_SIGNED_DISTANCE,
