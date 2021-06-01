@@ -39,7 +39,8 @@ pub enum DragFaceEvents {
 pub fn drag_face_default_input_map(
     voxel_cursor: VoxelCursor,
     mut events: EventWriter<DragFaceEvents>,
-    mut current_tool: ResMut<CurrentTool>,
+    mut current_tool: Res<CurrentTool>,
+    mut selection_state: Res<SelectionState>,
     cursor_ray: Res<CursorRay>,
 ) {
     let state = if let CurrentTool::DragFace(state) = &mut *current_tool {
@@ -49,10 +50,17 @@ pub fn drag_face_default_input_map(
     };
     match *state {
         DragFaceState::SelectionReady => {
-            if let Some(voxel_face) = voxel_cursor.voxel_just_pressed(MouseButton::Left) {
-                events.send(DragFaceEvents::StartDragFace(voxel_face))
-            }
+            if let SelectionState::SelectionReady {
+                quad_extent,
+                normal,
+            } = *selection_state {
+                if let Some(voxel_face) = voxel_cursor.voxel_just_pressed(MouseButton::Left) {
+                    if quad_extent.contains(voxel_face.point) {
+                        events.send(DragFaceEvents::StartDragFace(voxel_face))
+                    }
+                }
         }
+    }
         DragFaceState::DraggingFace {
             normal,
             previous_drag_point,
