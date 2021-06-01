@@ -2,14 +2,16 @@ use super::{
     drag_face::{drag_face_tool_system, DragFaceState},
     edit_timeline::EditTimeline,
     selection::SelectionPlugin,
-    terraformer::{terraformer_default_input_map, terraformer_system, Terraformer},
+    terraformer::{
+        terraformer_default_input_map, terraformer_system, Terraformer, TerraformerEvents,
+    },
     tool_switcher::tool_switcher_system,
     undo::undo_system,
     CurrentTool,
 };
 use crate::StatePlugin;
 
-use bevy::ecs::prelude::*;
+use bevy::{ecs::prelude::*, prelude::AppBuilder};
 
 /// Depends on the `VoxelPickingPlugin`.
 pub struct EditToolsPlugin;
@@ -19,6 +21,11 @@ impl EditToolsPlugin {
         commands.insert_resource(EditTimeline::new());
         commands.insert_resource(Terraformer::default());
         commands.insert_resource(CurrentTool::DragFace(DragFaceState::SelectionReady));
+    }
+
+    pub fn register_events(app: &mut AppBuilder) {
+        app.add_event::<TerraformerEvents>();
+
     }
 }
 

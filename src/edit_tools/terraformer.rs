@@ -1,4 +1,4 @@
-use super::{events::TerraformerEvents, CurrentTool, SnapshottingVoxelEditor};
+use super::{CurrentTool, SnapshottingVoxelEditor};
 
 use crate::{voxel::EMPTY_VOXEL_TYPE, CursorRay, VoxelCursor, VoxelType};
 
@@ -19,6 +19,14 @@ impl Default for Terraformer {
             dist_from_camera: None,
         }
     }
+}
+
+pub enum TerraformerEvents {
+    ChangeEditRadius(i8),
+    ChangeVoxelType(u8),
+    MakeSolid,
+    RemoveSolid,
+    FinishEdit,
 }
 
 pub fn terraformer_default_input_map(
