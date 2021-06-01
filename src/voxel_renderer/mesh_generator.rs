@@ -50,7 +50,7 @@ impl StatePlugin for MeshGeneratorPlugin {
 #[derive(Default)]
 pub struct ChunkMeshes {
     // Map from chunk key to mesh entity.
-    entities: SmallKeyHashMap<Point3i, Entity>,
+    entities: SmallKeyHashMap<ChunkKey3, Entity>,
 }
 
 /// Generates new meshes for all dirty chunks.
@@ -101,15 +101,16 @@ fn generate_mesh_for_each_chunk(
     local_caches: &ThreadLocalVoxelCache,
     local_mesh_buffers: &ThreadLocalMeshBuffers,
     pool: &ComputeTaskPool,
-) -> Vec<(Point3i, Option<(PosNormMesh, Vec<[u8; 4]>)>)> {
+) -> Vec<(ChunkKey3, Option<(PosNormMesh, Vec<[u8; 4]>)>)> {
     pool.scope(|s| {
-        for chunk_key in dirty_chunks.dirty_chunk_keys.iter().cloned() {
+        for chunk_min in dirty_chunks.dirty_chunk_mins.iter().cloned() {
+            let chunk_key = ChunkKey::new(0, chunk_min);
             s.spawn(async move {
                 let cache_tls = local_caches.get();
                 let reader = voxel_map.reader(&cache_tls);
 
                 let padded_chunk_extent = padded_surface_nets_chunk_extent(
-                    &reader.indexer.extent_for_chunk_at_key(chunk_key),
+                    &reader.indexer.extent_for_chunk_with_min(chunk_min),
                 );
 
                 let mesh_tls = local_mesh_buffers.get();
@@ -129,7 +130,7 @@ fn generate_mesh_for_each_chunk(
 
                 padded_chunk.set_minimum(padded_chunk_extent.minimum);
 
-                copy_extent(&padded_chunk_extent, &reader, padded_chunk);
+                copy_extent(&padded_chunk_extent, &reader.lod_view(0), padded_chunk);
 
                 let padded_sdf_chunk = TransformMap::new(padded_chunk, |(_type, dist)| dist);
 

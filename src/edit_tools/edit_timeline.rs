@@ -44,7 +44,8 @@ impl EditTimeline {
     }
 
     pub fn add_extent_to_snapshot(&mut self, extent: Extent3i, src_map: &CompressibleSdfChunkMap) {
-        for chunk_key in src_map.indexer.chunk_keys_for_extent(&extent) {
+        for chunk_min in src_map.indexer.chunk_mins_for_extent(&extent) {
+            let chunk_key = ChunkKey::new(0, chunk_min);
             self.current_snapshot
                 .voxels
                 .get_mut_chunk_or_insert_with(chunk_key, || {
@@ -54,7 +55,7 @@ impl EditTimeline {
                         .copy_without_caching(chunk_key)
                         .map(|c| c.into_decompressed())
                         .unwrap_or(ambient_sdf_array(
-                            src_map.indexer.extent_for_chunk_at_key(chunk_key),
+                            src_map.indexer.extent_for_chunk_with_min(chunk_min),
                         ))
                 });
         }
@@ -72,7 +73,7 @@ fn reversible_restore_snapshot(
 
         let mut redo_snap_chunks = empty_sdf_chunk_hash_map(indexer.chunk_shape());
         for (chunk_key, chunk) in storage.into_iter() {
-            editor.insert_chunk_and_touch_neighbors(chunk_key, chunk);
+            editor.insert_chunk_and_touch_neighbors(chunk_key.minimum, chunk);
             let old_chunk = editor
                 .map
                 .voxels
@@ -80,7 +81,7 @@ fn reversible_restore_snapshot(
                 .copy_without_caching(chunk_key)
                 .map(|c| c.into_decompressed())
                 .unwrap_or(ambient_sdf_array(
-                    indexer.extent_for_chunk_at_key(chunk_key),
+                    indexer.extent_for_chunk_with_min(chunk_key.minimum),
                 ));
             redo_snap_chunks.write_chunk(chunk_key, old_chunk);
         }
