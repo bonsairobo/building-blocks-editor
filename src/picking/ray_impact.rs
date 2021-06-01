@@ -42,7 +42,7 @@ pub fn voxel_cursor_impact_system(
     voxel_cursor_impact.maybe_impact = None;
     voxel_cursor_impact.normal = None;
 
-    if let CursorRay(Some(ray)) = cursor_ray.clone() {
+    if let CursorRay(Some(ray)) = *cursor_ray {
         if let Some(impact) = voxel_ray_cast(&*bvt, NCRay::from(ray), std::f32::INFINITY, |_| true)
         {
             let normal = Point3f::from(impact.impact.normal.normalize())

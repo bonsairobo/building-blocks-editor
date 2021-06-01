@@ -10,10 +10,12 @@ use bevy::{
 fn main() -> Result<(), ron::Error> {
     let config = Config::read_file("config.ron")?;
 
-    let mut window_desc = WindowDescriptor::default();
-    window_desc.width = 1600.0;
-    window_desc.height = 900.0;
-    window_desc.title = "Building Blocks Editor".to_string();
+    let window_desc = WindowDescriptor {
+        width: 1600.0,
+        height: 900.0,
+        title: "Building Blocks Editor".to_string(),
+        ..Default::default()
+    };
 
     App::build()
         // Core bevy stuff.

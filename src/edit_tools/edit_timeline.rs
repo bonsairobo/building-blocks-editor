@@ -54,9 +54,9 @@ impl EditTimeline {
                         // This chunk will eventually get cached after being written by the editor.
                         .copy_without_caching(chunk_key)
                         .map(|c| c.into_decompressed())
-                        .unwrap_or(ambient_sdf_array(
-                            src_map.indexer.extent_for_chunk_with_min(chunk_min),
-                        ))
+                        .unwrap_or_else(|| {
+                            ambient_sdf_array(src_map.indexer.extent_for_chunk_with_min(chunk_min))
+                        })
                 });
         }
     }
@@ -80,9 +80,9 @@ fn reversible_restore_snapshot(
                 .storage()
                 .copy_without_caching(chunk_key)
                 .map(|c| c.into_decompressed())
-                .unwrap_or(ambient_sdf_array(
-                    indexer.extent_for_chunk_with_min(chunk_key.minimum),
-                ));
+                .unwrap_or_else(|| {
+                    ambient_sdf_array(indexer.extent_for_chunk_with_min(chunk_key.minimum))
+                });
             redo_snap_chunks.write_chunk(chunk_key, old_chunk);
         }
         undo_queue.push_back(Snapshot {

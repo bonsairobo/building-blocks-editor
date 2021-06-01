@@ -39,16 +39,16 @@ pub enum DragFaceEvents {
 pub fn drag_face_default_input_map(
     voxel_cursor: VoxelCursor,
     mut events: EventWriter<DragFaceEvents>,
-    mut current_tool: ResMut<CurrentTool>,
+    current_tool: Res<CurrentTool>,
     selection_state: Res<SelectionState>,
     cursor_ray: Res<CursorRay>,
 ) {
-    let state = if let CurrentTool::DragFace(state) = &mut *current_tool {
+    let state = if let CurrentTool::DragFace(state) = *current_tool {
         state
     } else {
         return;
     };
-    match *state {
+    match state {
         DragFaceState::SelectionReady => {
             if let SelectionState::SelectionReady { quad_extent, .. } = *selection_state {
                 if let Some(voxel_face) = voxel_cursor.voxel_just_pressed(MouseButton::Left) {
@@ -110,17 +110,15 @@ pub fn drag_face_tool_system(
                     normal,
                 } = *selection_state
                 {
-                    if quad_extent.contains(voxel_face.point) {
-                        if let Some(mut controller) = mouse_camera_controllers.iter_mut().next() {
-                            controller.disable();
-                        }
-                        *state = DragFaceState::DraggingFace {
-                            quad_extent,
-                            normal,
-                            previous_drag_point: voxel_face.point,
-                        };
-                        *selection_state = SelectionState::Invisible;
+                    if let Some(mut controller) = mouse_camera_controllers.iter_mut().next() {
+                        controller.disable();
                     }
+                    *state = DragFaceState::DraggingFace {
+                        quad_extent,
+                        normal,
+                        previous_drag_point: voxel_face.point,
+                    };
+                    *selection_state = SelectionState::Invisible;
                 }
             }
             DragFaceEvents::UpdateDragFace(new_drag_point) => {
@@ -130,40 +128,38 @@ pub fn drag_face_tool_system(
                     previous_drag_point,
                 } = *state
                 {
-                    if *new_drag_point != previous_drag_point {
-                        let old_quad_extent = quad_extent;
+                    let old_quad_extent = quad_extent;
 
-                        let new_axis_coord = new_drag_point.axis_component(normal.axis);
-                        *quad_extent.minimum.axis_component_mut(normal.axis) = new_axis_coord;
+                    let new_axis_coord = new_drag_point.axis_component(normal.axis);
+                    *quad_extent.minimum.axis_component_mut(normal.axis) = new_axis_coord;
 
-                        let previous_axis_coord = previous_drag_point.axis_component(normal.axis);
-                        let write_voxel =
-                            if new_axis_coord * normal.sign > previous_axis_coord * normal.sign {
-                                // We're dragging in the direction of the normal, so we should write solid voxels.
-                                (VoxelType(2), Sd8::NEG_ONE)
-                            } else {
-                                // We're dragging in the opposite direction of the normal, so we should write empty voxels.
-                                (VoxelType(0), Sd8::ONE)
-                            };
-
-                        // Write voxels in the extent between the old and new quad.
-                        let fill_min = quad_extent.minimum.meet(old_quad_extent.minimum);
-                        let fill_max = quad_extent.max().join(old_quad_extent.max());
-                        let fill_extent = Extent3i::from_min_and_max(fill_min, fill_max);
-                        voxel_editor.edit_extent_and_touch_neighbors(
-                            fill_extent,
-                            |_p, (v_type, v_dist)| {
-                                *v_type = write_voxel.0;
-                                *v_dist = write_voxel.1;
-                            },
-                        );
-
-                        *state = DragFaceState::DraggingFace {
-                            quad_extent,
-                            normal,
-                            previous_drag_point: *new_drag_point,
+                    let previous_axis_coord = previous_drag_point.axis_component(normal.axis);
+                    let write_voxel =
+                        if new_axis_coord * normal.sign > previous_axis_coord * normal.sign {
+                            // We're dragging in the direction of the normal, so we should write solid voxels.
+                            (VoxelType(2), Sd8::NEG_ONE)
+                        } else {
+                            // We're dragging in the opposite direction of the normal, so we should write empty voxels.
+                            (VoxelType(0), Sd8::ONE)
                         };
-                    }
+
+                    // Write voxels in the extent between the old and new quad.
+                    let fill_min = quad_extent.minimum.meet(old_quad_extent.minimum);
+                    let fill_max = quad_extent.max().join(old_quad_extent.max());
+                    let fill_extent = Extent3i::from_min_and_max(fill_min, fill_max);
+                    voxel_editor.edit_extent_and_touch_neighbors(
+                        fill_extent,
+                        |_p, (v_type, v_dist)| {
+                            *v_type = write_voxel.0;
+                            *v_dist = write_voxel.1;
+                        },
+                    );
+
+                    *state = DragFaceState::DraggingFace {
+                        quad_extent,
+                        normal,
+                        previous_drag_point: *new_drag_point,
+                    };
                 }
             }
             DragFaceEvents::FinishDragFace => {

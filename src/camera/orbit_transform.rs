@@ -113,7 +113,7 @@ impl Smoother {
         debug_assert!(0.0 <= lag_weight);
         debug_assert!(lag_weight < 1.0);
 
-        let old_lerp_tfm = self.lerp_tfm.unwrap_or_else(|| new_tfm.clone());
+        let old_lerp_tfm = self.lerp_tfm.unwrap_or_else(|| *new_tfm);
 
         let lead_weight = 1.0 - lag_weight;
         let lerp_tfm = OrbitTransform {

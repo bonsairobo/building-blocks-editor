@@ -53,10 +53,12 @@ impl EditBuffer {
                         // map later.
                         .copy_without_caching(chunk_key)
                         .map(|c| c.into_decompressed())
-                        .unwrap_or(SdfArray::fill(
-                            reader.indexer.extent_for_chunk_with_min(chunk_min),
-                            EMPTY_SDF_VOXEL,
-                        ))
+                        .unwrap_or_else(|| {
+                            SdfArray::fill(
+                                reader.indexer.extent_for_chunk_with_min(chunk_min),
+                                EMPTY_SDF_VOXEL,
+                            )
+                        })
                 });
         }
 

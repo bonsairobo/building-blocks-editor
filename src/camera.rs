@@ -26,11 +26,11 @@ pub fn create_camera_entity(
     eye: Vec3,
     target: Vec3,
 ) -> Entity {
-    let mut camera_components = PerspectiveCameraBundle::default();
-    camera_components.transform = Transform::from_translation(eye).looking_at(target, Vec3::Y);
-
     commands
-        .spawn_bundle(camera_components)
+        .spawn_bundle(PerspectiveCameraBundle {
+            transform: Transform::from_translation(eye).looking_at(target, Vec3::Y),
+            ..Default::default()
+        })
         .insert(CursorRayCameraTag)
         .insert(MouseCameraController::new(control_config, eye, target))
         .id()

@@ -22,7 +22,7 @@ impl SdfVoxelMap {
         &'a self,
         handle: &'a ThreadLocalResourceHandle<SdfChunkCache>,
     ) -> CompressibleSdfChunkMapReader {
-        let local_cache = handle.get_or_create_with(|| SdfChunkCache::new());
+        let local_cache = handle.get_or_create_with(SdfChunkCache::new);
 
         self.voxels.reader(local_cache)
     }
