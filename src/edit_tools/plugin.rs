@@ -1,7 +1,9 @@
 use super::{
-    drag_face::{drag_face_tool_system, DragFaceState},
+    drag_face::{
+        drag_face_default_input_map, drag_face_tool_system, DragFaceEvents, DragFaceState,
+    },
     edit_timeline::EditTimeline,
-    selection::SelectionPlugin,
+    selection::{SelectionEvents, SelectionPlugin},
     terraformer::{
         terraformer_default_input_map, terraformer_system, Terraformer, TerraformerEvents,
     },
@@ -25,6 +27,8 @@ impl EditToolsPlugin {
 
     pub fn register_events(app: &mut AppBuilder) {
         app.add_event::<TerraformerEvents>();
+        app.add_event::<DragFaceEvents>();
+        app.add_event::<SelectionEvents>();
     }
 }
 
@@ -40,5 +44,6 @@ impl StatePlugin for EditToolsPlugin {
             .with_system(terraformer_system.system())
             .with_system(terraformer_default_input_map.system())
             .with_system(drag_face_tool_system.system())
+            .with_system(drag_face_default_input_map.system())
     }
 }
