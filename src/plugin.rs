@@ -63,8 +63,8 @@ impl Plugin for EditorPlugin {
             // This plugin should run systems in the LAST stage.
             .add_plugin(MapIoPlugin::new(CHUNK_SHAPE, ChunkCacheConfig::default()));
 
-        // Register editor events
-        register_editor_events(app);
+        // Register events that edit tools produce & consume 
+        EditToolsPlugin::register_events(app);
 
         // Editor scheduling.
         add_editor_schedule(app);
@@ -75,10 +75,6 @@ impl Plugin for EditorPlugin {
 enum EditorState {
     Loading,
     Editing,
-}
-
-fn register_editor_events(app: &mut AppBuilder) {
-    EditToolsPlugin::register_events(app);
 }
 
 fn add_editor_schedule(app: &mut AppBuilder) {
@@ -252,8 +248,4 @@ pub trait StatePlugin {
     fn add_exit_systems(set: SystemSet) -> SystemSet {
         set
     }
-}
-
-pub trait EventPlugin {
-    fn register_events(app: &mut AppBuilder);
 }
