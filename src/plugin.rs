@@ -63,7 +63,7 @@ impl Plugin for EditorPlugin {
             // This plugin should run systems in the LAST stage.
             .add_plugin(MapIoPlugin::new(CHUNK_SHAPE, ChunkCacheConfig::default()));
 
-        // Register events that edit tools produce & consume 
+        // Register events that edit tools produce & consume
         EditToolsPlugin::register_events(app);
 
         // Editor scheduling.

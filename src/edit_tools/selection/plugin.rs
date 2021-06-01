@@ -1,5 +1,7 @@
 use super::{
-    controller::{initialize_selection_controller, selection_control_system},
+    controller::{
+        initialize_selection_controller, selection_control_system, selection_default_input_map,
+    },
     view::{initialize_selection_view, selection_view_system},
 };
 use crate::StatePlugin;
@@ -16,6 +18,7 @@ impl StatePlugin for SelectionPlugin {
 
     fn add_update_systems(set: SystemSet) -> SystemSet {
         set.with_system(selection_control_system.system())
+            .with_system(selection_default_input_map.system())
             .with_system(selection_view_system.system())
     }
 }
