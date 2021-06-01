@@ -39,8 +39,8 @@ pub enum DragFaceEvents {
 pub fn drag_face_default_input_map(
     voxel_cursor: VoxelCursor,
     mut events: EventWriter<DragFaceEvents>,
-    mut current_tool: Res<CurrentTool>,
-    mut selection_state: Res<SelectionState>,
+    mut current_tool: ResMut<CurrentTool>,
+    selection_state: Res<SelectionState>,
     cursor_ray: Res<CursorRay>,
 ) {
     let state = if let CurrentTool::DragFace(state) = &mut *current_tool {
@@ -50,17 +50,14 @@ pub fn drag_face_default_input_map(
     };
     match *state {
         DragFaceState::SelectionReady => {
-            if let SelectionState::SelectionReady {
-                quad_extent,
-                normal,
-            } = *selection_state {
+            if let SelectionState::SelectionReady { quad_extent, .. } = *selection_state {
                 if let Some(voxel_face) = voxel_cursor.voxel_just_pressed(MouseButton::Left) {
                     if quad_extent.contains(voxel_face.point) {
                         events.send(DragFaceEvents::StartDragFace(voxel_face))
                     }
                 }
+            }
         }
-    }
         DragFaceState::DraggingFace {
             normal,
             previous_drag_point,
@@ -108,26 +105,22 @@ pub fn drag_face_tool_system(
     for event in events.iter() {
         match event {
             DragFaceEvents::StartDragFace(voxel_face) => {
-                let (quad_extent, normal) = if let SelectionState::SelectionReady {
+                if let SelectionState::SelectionReady {
                     quad_extent,
                     normal,
                 } = *selection_state
                 {
-                    (quad_extent, normal)
-                } else {
-                    return;
-                };
-
-                if quad_extent.contains(voxel_face.point) {
-                    if let Some(mut controller) = mouse_camera_controllers.iter_mut().next() {
-                        controller.disable();
+                    if quad_extent.contains(voxel_face.point) {
+                        if let Some(mut controller) = mouse_camera_controllers.iter_mut().next() {
+                            controller.disable();
+                        }
+                        *state = DragFaceState::DraggingFace {
+                            quad_extent,
+                            normal,
+                            previous_drag_point: voxel_face.point,
+                        };
+                        *selection_state = SelectionState::Invisible;
                     }
-                    *state = DragFaceState::DraggingFace {
-                        quad_extent,
-                        normal,
-                        previous_drag_point: voxel_face.point,
-                    };
-                    *selection_state = SelectionState::Invisible;
                 }
             }
             DragFaceEvents::UpdateDragFace(new_drag_point) => {
