@@ -21,6 +21,11 @@ Unreal Engine style mouse camera.
 - Right drag: Change viewing angle
 - Left and Right drag: Translate up/down/left/right
 
+Orbital Camera
+- CTRL + mouse: Orbit camera
+- Middle click + mouse: Pan camera
+- Mouse wheel: Zoom
+
 ### Editing Tools
 
 - `T`: Enter terraforming mode
