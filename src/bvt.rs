@@ -65,7 +65,7 @@ fn octree_generator_system(
     // Otherwise, if an empty chunk is adjacent to a non-empty chunk, then it may actually have influence over the shape of the
     // adjacent mesh. (Positive values are "empty," but used for surface interpolation).
     let neighborhood = Point3i::MOORE_OFFSETS;
-    let chunk_shape = voxel_map.voxels.builder().chunk_shape;
+    let chunk_shape = voxel_map.voxels.chunk_shape();
     for chunk_min in new_empty_chunks.into_iter() {
         // See if there are any adjacent non-empty chunks.
         let mut all_neighbors_empty = true;
