@@ -42,12 +42,44 @@ fn octree_generator_system(
     let new_chunk_octrees =
         generate_octree_for_each_chunk(&*dirty_chunks, &*voxel_map, &*local_caches, &*pool);
 
+    let new_empty_chunks: Vec<Point3i> = new_chunk_octrees
+        .iter()
+        .filter_map(|(chunk_min, octree)| {
+            if octree.is_empty() {
+                Some(*chunk_min)
+            } else {
+                None
+            }
+        })
+        .collect();
+
     for (chunk_min, octree) in new_chunk_octrees.into_iter() {
         if octree.is_empty() {
             voxel_bvt.remove(&chunk_min);
-            empty_chunks.mark_for_removal(ChunkKey::new(0, chunk_min));
         } else {
             voxel_bvt.insert(chunk_min, octree);
+        }
+    }
+
+    // We want to delete any SDF chunks that are not adjacent to a non-empty chunk.
+    // Otherwise, if an empty chunk is adjacent to a non-empty chunk, then it may actually have influence over the shape of the
+    // adjacent mesh. (Positive values are "empty," but used for surface interpolation).
+    let neighborhood = Point3i::MOORE_OFFSETS;
+    let chunk_shape = voxel_map.voxels.builder().chunk_shape;
+    for chunk_min in new_empty_chunks.into_iter() {
+        // See if there are any adjacent non-empty chunks.
+        let mut all_neighbors_empty = true;
+        for offset in neighborhood.iter().cloned() {
+            let neighbor = chunk_min + offset * chunk_shape;
+            if voxel_bvt.contains_key(&neighbor) {
+                // We found a non-empty neighbor.
+                all_neighbors_empty = false;
+                break;
+            }
+        }
+
+        if all_neighbors_empty {
+            empty_chunks.mark_for_removal(ChunkKey::new(0, chunk_min));
         }
     }
 }

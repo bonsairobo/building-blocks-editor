@@ -5,7 +5,7 @@ use bevy::ecs::prelude::*;
 use building_blocks::{
     core::{prelude::*, SignedAxis3},
     search::{
-        collision::{voxel_ray_cast, VoxelRayImpact},
+        collision::{cast_ray_at_voxels, VoxelRayImpact},
         ncollide3d::query::Ray as NCRay,
     },
 };
@@ -43,7 +43,8 @@ pub fn voxel_cursor_impact_system(
     voxel_cursor_impact.normal = None;
 
     if let CursorRay(Some(ray)) = *cursor_ray {
-        if let Some(impact) = voxel_ray_cast(&*bvt, NCRay::from(ray), std::f32::INFINITY, |_| true)
+        if let Some(impact) =
+            cast_ray_at_voxels(&*bvt, NCRay::from(ray), std::f32::INFINITY, |_| true)
         {
             let normal = Point3f::from(impact.impact.normal.normalize())
                 .round()
