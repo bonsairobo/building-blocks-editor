@@ -15,6 +15,7 @@ approx = "0.4"
 ron = "0.6"
 serde = "1.0"
 thread_local = "1.0"
+bevy-orbit-controls = { git = "https://github.com/rezural/bevy-orbit-controls.git", rev = "aa7abae" }
 
 [dependencies.bevy]
 version = "0.5"

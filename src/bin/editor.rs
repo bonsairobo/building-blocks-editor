@@ -30,6 +30,7 @@ fn main() -> Result<(), ron::Error> {
             ..Default::default()
         })
         .insert_resource(WireframeConfig { global: true })
+        .insert_resource(config)
         .add_plugins(BevyPlugins::new(config))
         // Editor stuff.
         .add_plugin(EditorPlugin)
