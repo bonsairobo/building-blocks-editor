@@ -26,7 +26,7 @@ impl EditTimeline {
     }
 
     pub fn store_current_snapshot(&mut self) {
-        let chunk_shape = self.current_snapshot.voxels.indexer.chunk_shape();
+        let chunk_shape = self.current_snapshot.voxels.chunk_shape();
         let finalized_snapshot =
             std::mem::replace(&mut self.current_snapshot, Snapshot::new(chunk_shape));
         self.undo_queue.push_back(finalized_snapshot);

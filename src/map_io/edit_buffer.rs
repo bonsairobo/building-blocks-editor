@@ -35,10 +35,7 @@ impl EditBuffer {
         edit_func: impl FnMut(Point3i, (&mut VoxelType, &mut Sd8)),
         touch_neighbors: bool,
     ) {
-        debug_assert!(reader
-            .indexer
-            .chunk_shape()
-            .eq(&self.edited_voxels.indexer.chunk_shape()));
+        debug_assert!(reader.chunk_shape().eq(&self.edited_voxels.chunk_shape()));
 
         // Copy any of the overlapping chunks that don't already exist in the backbuffer, i.e. those chunks which haven't been
         // modified yet.
@@ -104,7 +101,7 @@ impl EditBuffer {
     fn dirty_chunks_for_extent(&mut self, touch_neighbors: bool, extent: Extent3i) {
         // Mark the chunks and maybe their neighbors as dirty.
         let dirty_extent = if touch_neighbors {
-            let chunk_shape = self.edited_voxels.indexer.chunk_shape();
+            let chunk_shape = self.edited_voxels.chunk_shape();
 
             Extent3i::from_min_and_max(extent.minimum - chunk_shape, extent.max() + chunk_shape)
         } else {
@@ -136,7 +133,7 @@ pub fn double_buffering_system(
 ) {
     let edit_buffer = std::mem::replace(
         &mut *edit_buffer,
-        EditBuffer::new(voxel_map.voxels.indexer.chunk_shape()),
+        EditBuffer::new(voxel_map.voxels.chunk_shape()),
     );
     *dirty_chunks = edit_buffer.merge_edits(&mut voxel_map.voxels);
 }
