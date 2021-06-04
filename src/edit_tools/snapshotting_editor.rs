@@ -17,12 +17,12 @@ impl<'a> SnapshottingVoxelEditor<'a> {
         edit_func: impl FnMut(Point3i, (&mut VoxelType, &mut Sd8)),
     ) {
         self.timeline
-            .add_extent_to_snapshot(extent, &self.editor.map.voxels);
+            .add_extent_to_current_edit(extent, &self.editor.map.voxels);
         self.editor
             .edit_extent_and_touch_neighbors(extent, edit_func);
     }
 
     pub fn finish_edit(&mut self) {
-        self.timeline.store_current_snapshot();
+        self.timeline.store_current_edit();
     }
 }

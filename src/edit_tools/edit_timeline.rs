@@ -9,9 +9,9 @@ use std::collections::VecDeque;
 // TODO: limit the memory usage of the timeline somehow
 
 pub struct EditTimeline {
-    undo_queue: VecDeque<Snapshot>,
-    redo_queue: VecDeque<Snapshot>,
-    current_snapshot: Snapshot,
+    undo_queue: VecDeque<Edit>,
+    redo_queue: VecDeque<Edit>,
+    current_edit: Edit,
 }
 
 impl EditTimeline {
@@ -19,17 +19,16 @@ impl EditTimeline {
         Self {
             undo_queue: Default::default(),
             redo_queue: Default::default(),
-            current_snapshot: Snapshot {
+            current_edit: Edit {
                 voxels: empty_sdf_chunk_hash_map(CHUNK_SHAPE),
             },
         }
     }
 
-    pub fn store_current_snapshot(&mut self) {
-        let chunk_shape = self.current_snapshot.voxels.chunk_shape();
-        let finalized_snapshot =
-            std::mem::replace(&mut self.current_snapshot, Snapshot::new(chunk_shape));
-        self.undo_queue.push_back(finalized_snapshot);
+    pub fn store_current_edit(&mut self) {
+        let chunk_shape = self.current_edit.voxels.chunk_shape();
+        let finalized_edit = std::mem::replace(&mut self.current_edit, Edit::new(chunk_shape));
+        self.undo_queue.push_back(finalized_edit);
 
         // We don't want to keep "undone edits" before this new one.
         self.redo_queue.clear();
@@ -43,10 +42,14 @@ impl EditTimeline {
         reversible_restore_snapshot(&mut self.redo_queue, &mut self.undo_queue, editor)
     }
 
-    pub fn add_extent_to_snapshot(&mut self, extent: Extent3i, src_map: &CompressibleSdfChunkMap) {
+    pub fn add_extent_to_current_edit(
+        &mut self,
+        extent: Extent3i,
+        src_map: &CompressibleSdfChunkMap,
+    ) {
         for chunk_min in src_map.indexer.chunk_mins_for_extent(&extent) {
             let chunk_key = ChunkKey::new(0, chunk_min);
-            self.current_snapshot
+            self.current_edit
                 .voxels
                 .get_mut_chunk_or_insert_with(chunk_key, || {
                     src_map
@@ -63,13 +66,13 @@ impl EditTimeline {
 }
 
 fn reversible_restore_snapshot(
-    do_queue: &mut VecDeque<Snapshot>,
-    undo_queue: &mut VecDeque<Snapshot>,
+    do_queue: &mut VecDeque<Edit>,
+    undo_queue: &mut VecDeque<Edit>,
     editor: &mut VoxelEditor,
 ) {
-    if let Some(snapshot) = do_queue.pop_back() {
-        let indexer = snapshot.voxels.indexer;
-        let storage = snapshot.voxels.take_storage();
+    if let Some(edit) = do_queue.pop_back() {
+        let indexer = edit.voxels.indexer;
+        let storage = edit.voxels.take_storage();
 
         let mut redo_snap_chunks = empty_sdf_chunk_hash_map(indexer.chunk_shape());
         for (chunk_key, chunk) in storage.into_iter() {
@@ -85,17 +88,18 @@ fn reversible_restore_snapshot(
                 });
             redo_snap_chunks.write_chunk(chunk_key, old_chunk);
         }
-        undo_queue.push_back(Snapshot {
+        undo_queue.push_back(Edit {
             voxels: redo_snap_chunks,
         });
     }
 }
 
-struct Snapshot {
+/// The set of modified chunks in the state after the edit.
+struct Edit {
     voxels: SdfChunkHashMap,
 }
 
-impl Snapshot {
+impl Edit {
     fn new(chunk_shape: Point3i) -> Self {
         Self {
             voxels: empty_sdf_chunk_hash_map(chunk_shape),
