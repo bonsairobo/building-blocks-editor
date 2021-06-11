@@ -35,6 +35,6 @@ features = ["glam", "lz4", "mesh", "nalgebra", "ncollide", "search"]
 
 [dependencies.smooth-bevy-cameras]
 git = "https://github.com/bonsairobo/smooth-bevy-cameras"
-rev = "09e41b2"
+rev = "8782b98"
 # branch = "main"
 # path = "../smooth-bevy-cameras"
