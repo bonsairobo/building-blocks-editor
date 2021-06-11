@@ -14,7 +14,7 @@ mod voxel;
 mod voxel_renderer;
 
 pub use bvt::{BVTPlugin, VoxelBVT};
-pub use camera::{create_camera_entity, CameraPlugin, CursorRay, UnrealCameraControlConfig};
+pub use camera::{create_camera_entity, CameraPlugin, CursorRay};
 pub use config::{CameraConfig, Config};
 pub use cursor_tracker::{CursorPosition, CursorPositionPlugin};
 pub use edit_tools::EditToolsPlugin;

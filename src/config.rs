@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::camera::{OrbitCameraControlConfig, UnrealCameraControlConfig};
+use smooth_bevy_cameras::{OrbitCameraControlConfig, UnrealCameraControlConfig};
 
 #[derive(Clone, Copy, Deserialize, Default)]
 pub struct Config {

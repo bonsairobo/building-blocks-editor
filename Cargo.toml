@@ -32,3 +32,8 @@ rev = "15dcfe6"
 # version = "0.2.1"
 default-features = false
 features = ["glam", "lz4", "mesh", "nalgebra", "ncollide", "search"]
+
+[dependencies.smooth-bevy-cameras]
+git = "https://github.com/bonsairobo/smooth-bevy-cameras"
+rev = "bf0dc70"
+# branch = "main"

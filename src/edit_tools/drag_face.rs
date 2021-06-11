@@ -1,4 +1,4 @@
-use crate::{camera::UnrealCameraController, picking::VoxelFace};
+use crate::picking::VoxelFace;
 
 use super::{selection::SelectionState, CurrentTool, SnapshottingVoxelEditor};
 
@@ -19,6 +19,7 @@ use building_blocks::{
     mesh::OrientedCubeFace,
     storage::Sd8,
 };
+use smooth_bevy_cameras::UnrealCameraController;
 
 #[derive(Clone, Copy)]
 pub enum DragFaceState {

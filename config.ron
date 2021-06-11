@@ -1,8 +1,14 @@
 (
     wireframes: false,
-    camera: Orbit(OrbitCameraControlConfig(
+    // camera: Orbit(OrbitCameraControlConfig(
+    //     mouse_rotate_sensitivity: 0.002,
+    //     mouse_translate_sensitivity: 0.1,
+    //     smoothing_weight: 0.8,
+    // )),
+    camera: Unreal(UnrealCameraControlConfig(
         mouse_rotate_sensitivity: 0.002,
         mouse_translate_sensitivity: 0.1,
-        smoothing_weight: 0.8,
+        trackpad_translate_sensitivity: 0.1,
+        smoothing_weight: 0.9,
     )),
 )

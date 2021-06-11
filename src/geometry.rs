@@ -7,8 +7,6 @@ pub use building_blocks::{
     search::ncollide3d::{na, query::Ray as NCRay},
 };
 
-const PI: f32 = std::f32::consts::PI;
-
 pub fn offset_transform(offset: Point3f) -> Transform {
     Transform::from_translation(offset.into())
 }
@@ -94,45 +92,6 @@ pub fn closest_points_on_two_lines(l1: &Ray3, l2: &Ray3) -> Option<(Vec3, Vec3)>
     ))
 }
 
-/// Returns pitch and yaw angles that rotates z unit vector to v. The yaw is applied first to z
-/// about the y axis to get z'. Then the pitch is applied about some axis orthogonal to z' in the
-/// XZ plane to get v.
-pub fn yaw_and_pitch_from_vector(v: Vec3) -> (f32, f32) {
-    debug_assert_ne!(v, Vec3::ZERO);
-
-    let y = Vec3::Y;
-    let z = Vec3::Z;
-
-    let v_xz = Vec3::new(v.x, 0.0, v.z);
-
-    if v_xz == Vec3::ZERO {
-        if v.dot(y) > 0.0 {
-            return (0.0, PI / 2.0);
-        } else {
-            return (0.0, -PI / 2.0);
-        }
-    }
-
-    let mut yaw = v_xz.angle_between(z);
-    if v.x < 0.0 {
-        yaw *= -1.0;
-    }
-
-    let mut pitch = v_xz.angle_between(v);
-    if v.y < 0.0 {
-        pitch *= -1.0;
-    }
-
-    (yaw, pitch)
-}
-
-pub fn unit_vector_from_yaw_and_pitch(yaw: f32, pitch: f32) -> Vec3 {
-    let ray = Mat3::from_rotation_y(yaw) * Vec3::Z;
-    let pitch_axis = ray.cross(Vec3::Y);
-
-    Mat3::from_axis_angle(pitch_axis, pitch) * ray
-}
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Plane {
     pub origin: Vec3,
@@ -173,53 +132,6 @@ pub fn ray_plane_intersection(r: &Ray3, p: &Plane) -> RayPlaneIntersection {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    use approx::assert_relative_eq;
-
-    const PI: f32 = std::f32::consts::PI;
-
-    #[test]
-    fn test_yaw_and_pitch_identity() {
-        let v = Vec3::new(0.0, 0.0, 1.0);
-        let (yaw, pitch) = yaw_and_pitch_from_vector(v);
-
-        assert_relative_eq!(yaw, 0.0);
-        assert_relative_eq!(pitch, 0.0);
-    }
-
-    #[test]
-    fn test_yaw_only() {
-        let (yaw, pitch) = yaw_and_pitch_from_vector(Vec3::new(1.0, 0.0, 0.0));
-        assert_relative_eq!(yaw, PI / 2.0);
-        assert_relative_eq!(pitch, 0.0);
-
-        let (yaw, pitch) = yaw_and_pitch_from_vector(Vec3::new(-1.0, 0.0, 0.0));
-        assert_relative_eq!(yaw, -PI / 2.0);
-        assert_relative_eq!(pitch, 0.0);
-    }
-
-    #[test]
-    fn test_pitch_only() {
-        let (yaw, pitch) = yaw_and_pitch_from_vector(Vec3::new(0.0, 1.0, 0.0));
-        assert_relative_eq!(yaw, 0.0);
-        assert_relative_eq!(pitch, PI / 2.0);
-
-        let (yaw, pitch) = yaw_and_pitch_from_vector(Vec3::new(0.0, -1.0, 0.0));
-        assert_relative_eq!(yaw, 0.0);
-        assert_relative_eq!(pitch, -PI / 2.0);
-    }
-
-    #[test]
-    fn test_yaw_and_pitch() {
-        let (yaw, pitch) = yaw_and_pitch_from_vector(Vec3::new(0.5f32.sqrt(), 1.0, 0.5f32.sqrt()));
-        assert_relative_eq!(yaw, PI / 4.0);
-        assert_relative_eq!(pitch, PI / 4.0);
-
-        let (yaw, pitch) =
-            yaw_and_pitch_from_vector(Vec3::new(-0.5f32.sqrt(), -1.0, 0.5f32.sqrt()));
-        assert_relative_eq!(yaw, -PI / 4.0);
-        assert_relative_eq!(pitch, -PI / 4.0);
-    }
 
     #[test]
     fn sanity_test_closest_points_on_two_lines() {
