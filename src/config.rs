@@ -1,9 +1,11 @@
 use serde::Deserialize;
 
+use crate::camera::{OrbitCameraControlConfig, UnrealCameraControlConfig};
+
 #[derive(Clone, Copy, Deserialize, Default)]
 pub struct Config {
     pub wireframes: bool,
-    pub camera: CameraType,
+    pub camera: CameraConfig,
 }
 
 impl Config {
@@ -15,13 +17,18 @@ impl Config {
 }
 
 #[derive(Clone, Copy, Deserialize)]
-pub enum CameraType {
-    Unreal,
-    Orbit,
+pub enum CameraConfig {
+    Unreal(UnrealCameraControlConfig),
+    Orbit(OrbitCameraControlConfig),
 }
 
-impl Default for CameraType {
+impl Default for CameraConfig {
     fn default() -> Self {
-        CameraType::Unreal
+        CameraConfig::Unreal(UnrealCameraControlConfig {
+            mouse_rotate_sensitivity: 0.002,
+            mouse_translate_sensitivity: 0.1,
+            trackpad_translate_sensitivity: 0.1,
+            smoothing_weight: 0.9,
+        })
     }
 }

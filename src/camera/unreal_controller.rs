@@ -9,18 +9,18 @@ use bevy::{
     math::prelude::*,
     transform::components::Transform,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 /// A camera controlled with the mouse in the same way as Unreal Engine's viewport controller.
-pub struct MouseCameraController {
-    control_config: CameraControlConfig,
+pub struct UnrealCameraController {
+    control_config: UnrealCameraControlConfig,
     transform: OrbitTransform,
     smoother: Smoother,
     enabled: bool,
 }
 
-impl MouseCameraController {
-    pub fn new(control_config: CameraControlConfig, pivot: Vec3, orbit: Vec3) -> Self {
+impl UnrealCameraController {
+    pub fn new(control_config: UnrealCameraControlConfig, pivot: Vec3, orbit: Vec3) -> Self {
         Self {
             control_config,
             transform: OrbitTransform { pivot, orbit },
@@ -38,19 +38,19 @@ impl MouseCameraController {
     }
 }
 
-#[derive(Deserialize, Serialize)]
-pub struct CameraControlConfig {
+#[derive(Clone, Copy, Deserialize)]
+pub struct UnrealCameraControlConfig {
     pub mouse_rotate_sensitivity: f32,
     pub mouse_translate_sensitivity: f32,
     pub trackpad_translate_sensitivity: f32,
     pub smoothing_weight: f32,
 }
 
-pub fn mouse_camera_control_system(
+pub fn unreal_camera_control_system(
     mut mouse_wheel_reader: EventReader<MouseWheel>,
     mouse_buttons: Res<Input<MouseButton>>,
     cursor_position: Res<CursorPosition>,
-    mut cameras: Query<(&mut MouseCameraController, &mut Transform)>,
+    mut cameras: Query<(&mut UnrealCameraController, &mut Transform)>,
 ) {
     let (mut camera, mut camera_transform) = if let Some((camera, tfm)) = cameras.iter_mut().next()
     {
@@ -58,14 +58,13 @@ pub fn mouse_camera_control_system(
     } else {
         return;
     };
-    let MouseCameraController {
+    let UnrealCameraController {
         control_config,
         transform,
         smoother,
         enabled,
     } = &mut *camera;
 
-    // We must be pressing the camera button for anything to take effect.
     if *enabled {
         let cursor_delta = cursor_position.frame_delta();
 

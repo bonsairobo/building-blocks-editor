@@ -14,8 +14,8 @@ mod voxel;
 mod voxel_renderer;
 
 pub use bvt::{BVTPlugin, VoxelBVT};
-pub use camera::{create_camera_entity, CameraControlConfig, CameraPlugin, CursorRay};
-pub use config::Config;
+pub use camera::{create_camera_entity, CameraPlugin, CursorRay, UnrealCameraControlConfig};
+pub use config::{CameraConfig, Config};
 pub use cursor_tracker::{CursorPosition, CursorPositionPlugin};
 pub use edit_tools::EditToolsPlugin;
 pub use immediate_mode::{ImmediateModePlugin, ImmediateModeTag};

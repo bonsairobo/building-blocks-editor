@@ -1,8 +1,7 @@
 use crate::{
-    camera::OrbitCameraPlugin,
     create_camera_entity, empty_compressible_sdf_chunk_map,
     voxel_renderer::{ArrayMaterial, MeshGeneratorPlugin, MeshMaterial, VoxelRenderPlugin},
-    BVTPlugin, CameraControlConfig, CameraPlugin, ChunkCacheConfig, Config, CursorPositionPlugin,
+    BVTPlugin, CameraConfig, CameraPlugin, ChunkCacheConfig, Config, CursorPositionPlugin,
     EditToolsPlugin, ImmediateModePlugin, MapIoPlugin, SdfVoxelMap, SdfVoxelPalette, VoxelEditor,
     VoxelMaterial, VoxelPickingPlugin, VoxelTypeInfo, CHUNK_SHAPE,
 };
@@ -55,22 +54,14 @@ pub struct EditorPlugin;
 
 impl Plugin for EditorPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        let config = app.app.world.get_resource::<Config>();
-
-        let camera_type = config.copied().unwrap_or_default().camera;
-
         let app = app
             // Core stuff that always runs.
             .add_plugin(CursorPositionPlugin)
             .add_plugin(ImmediateModePlugin)
             .add_plugin(VoxelRenderPlugin)
             // This plugin should run systems in the LAST stage.
-            .add_plugin(MapIoPlugin::new(CHUNK_SHAPE, ChunkCacheConfig::default()));
-
-        let app = match camera_type {
-            crate::config::CameraType::Unreal => app.add_plugin(CameraPlugin),
-            crate::config::CameraType::Orbit => app.add_plugin(OrbitCameraPlugin),
-        };
+            .add_plugin(MapIoPlugin::new(CHUNK_SHAPE, ChunkCacheConfig::default()))
+            .add_plugin(CameraPlugin);
 
         // Register events that edit tools produce & consume
         EditToolsPlugin::register_events(app);
@@ -191,7 +182,7 @@ fn initialize_editor(mut commands: Commands, mut voxel_editor: VoxelEditor, conf
     });
 
     create_lights(&mut commands);
-    initialize_camera(&mut commands, config);
+    initialize_camera(&mut commands, config.camera);
 }
 
 fn create_lights(commands: &mut Commands) {
@@ -215,16 +206,10 @@ fn create_lights(commands: &mut Commands) {
     }
 }
 
-fn initialize_camera(commands: &mut Commands, config: Res<Config>) {
+fn initialize_camera(commands: &mut Commands, camera_config: CameraConfig) {
     let eye = Vec3::new(100.0, 100.0, 100.0);
     let target = Vec3::new(0.0, 0.0, 0.0);
-    let control_config = CameraControlConfig {
-        mouse_rotate_sensitivity: 0.002,
-        mouse_translate_sensitivity: 0.1,
-        trackpad_translate_sensitivity: 0.1,
-        smoothing_weight: 0.9,
-    };
-    create_camera_entity(commands, control_config, *config, eye, target);
+    create_camera_entity(commands, camera_config, eye, target);
 }
 
 pub struct PluginAdder(pub SystemSet);

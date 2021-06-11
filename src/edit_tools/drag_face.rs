@@ -1,4 +1,4 @@
-use crate::{camera::MouseCameraController, picking::VoxelFace};
+use crate::{camera::UnrealCameraController, picking::VoxelFace};
 
 use super::{selection::SelectionState, CurrentTool, SnapshottingVoxelEditor};
 
@@ -93,7 +93,7 @@ pub fn drag_face_tool_system(
     mut current_tool: ResMut<CurrentTool>,
     mut voxel_editor: SnapshottingVoxelEditor,
     mut selection_state: ResMut<SelectionState>,
-    mut mouse_camera_controllers: Query<&mut MouseCameraController>,
+    mut mouse_camera_controllers: Query<&mut UnrealCameraController>,
     mut events: EventReader<DragFaceEvents>,
 ) {
     let state = if let CurrentTool::DragFace(state) = &mut *current_tool {
