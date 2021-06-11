@@ -19,7 +19,7 @@ use building_blocks::{
     mesh::OrientedCubeFace,
     storage::Sd8,
 };
-use smooth_bevy_cameras::UnrealCameraController;
+use smooth_bevy_cameras::controllers::unreal::UnrealCameraController;
 
 #[derive(Clone, Copy)]
 pub enum DragFaceState {
@@ -112,7 +112,7 @@ pub fn drag_face_tool_system(
                 } = *selection_state
                 {
                     if let Some(mut controller) = mouse_camera_controllers.iter_mut().next() {
-                        controller.disable();
+                        controller.enabled = false;
                     }
                     *state = DragFaceState::DraggingFace {
                         quad_extent,
@@ -166,7 +166,7 @@ pub fn drag_face_tool_system(
             DragFaceEvents::FinishDragFace => {
                 // Done dragging.
                 if let Some(mut controller) = mouse_camera_controllers.iter_mut().next() {
-                    controller.enable();
+                    controller.enabled = true;
                 }
                 voxel_editor.finish_edit();
                 *state = DragFaceState::SelectionReady;

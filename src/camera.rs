@@ -8,8 +8,8 @@ use cursor_ray::CursorRayPlugin;
 
 use bevy::{app::prelude::*, ecs::prelude::*, math::prelude::*};
 use smooth_bevy_cameras::{
-    OrbitCameraBundle, OrbitCameraControlConfig, SmoothCamerasPlugin, UnrealCameraBundle,
-    UnrealCameraControlConfig,
+    controllers::{orbit::*, unreal::*},
+    OrbitTransformPlugin,
 };
 
 pub fn create_camera_entity(
@@ -28,21 +28,23 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_plugin(SmoothCamerasPlugin)
+        app.add_plugin(OrbitTransformPlugin)
+            .add_plugin(UnrealCameraPlugin)
+            .add_plugin(OrbitCameraPlugin)
             .add_plugin(CursorRayPlugin);
     }
 }
 
 pub fn create_unreal_camera_entity(
     commands: &mut Commands,
-    control_config: UnrealCameraControlConfig,
+    controller: UnrealCameraController,
     eye: Vec3,
     target: Vec3,
 ) -> Entity {
     commands
         .spawn_bundle(UnrealCameraBundle::new(
+            controller,
             Default::default(),
-            control_config,
             eye,
             target,
         ))
@@ -52,14 +54,14 @@ pub fn create_unreal_camera_entity(
 
 pub fn create_orbit_camera_entity(
     commands: &mut Commands,
-    control_config: OrbitCameraControlConfig,
+    controller: OrbitCameraController,
     eye: Vec3,
     target: Vec3,
 ) -> Entity {
     commands
         .spawn_bundle(OrbitCameraBundle::new(
+            controller,
             Default::default(),
-            control_config,
             eye,
             target,
         ))

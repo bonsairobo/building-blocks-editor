@@ -1,6 +1,8 @@
 use serde::Deserialize;
 
-use smooth_bevy_cameras::{OrbitCameraControlConfig, UnrealCameraControlConfig};
+use smooth_bevy_cameras::controllers::{
+    orbit::OrbitCameraController, unreal::UnrealCameraController,
+};
 
 #[derive(Clone, Copy, Deserialize, Default)]
 pub struct Config {
@@ -18,17 +20,12 @@ impl Config {
 
 #[derive(Clone, Copy, Deserialize)]
 pub enum CameraConfig {
-    Unreal(UnrealCameraControlConfig),
-    Orbit(OrbitCameraControlConfig),
+    Unreal(UnrealCameraController),
+    Orbit(OrbitCameraController),
 }
 
 impl Default for CameraConfig {
     fn default() -> Self {
-        CameraConfig::Unreal(UnrealCameraControlConfig {
-            mouse_rotate_sensitivity: 0.002,
-            mouse_translate_sensitivity: 0.1,
-            trackpad_translate_sensitivity: 0.1,
-            smoothing_weight: 0.9,
-        })
+        CameraConfig::Orbit(Default::default())
     }
 }
