@@ -1,5 +1,7 @@
 # Building Blocks Editor
 
+## THIS PROJECT HAS MOVED: https://github.com/bonsairobo/feldspar-editor
+
 Voxel map editor using [building-blocks](https://github.com/bonsairobo/building-blocks) and [bevy](https://github.com/bevyengine/bevy).
 
 ## Warning
